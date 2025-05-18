@@ -1,0 +1,23 @@
+[images]
+  remote_images = ["https://source.unsplash.com/.*", "https://images.unsplash.com/.*", "https://ext.same-assets.com/.*", "https://ugc.same-assets.com/.*"]
+
+[build]
+  command = "bun run build"
+  publish = "dist"
+
+[functions]
+  directory = "dist/functions"
+  node_bundler = "esbuild"
+
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/functions/entry"
+  status = 200
+
+[dev]
+  command = "bun run dev"
+  port = 4321
+  targetPort = 4321
+
+[build.environment]
+  NODE_VERSION = "18.18.0"

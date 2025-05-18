@@ -1,0 +1,322 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { tags } from '../data/mockData';
+
+// Explicitly set this page to be static
+export const prerender = true;
+
+// 常用标签（按使用次数排序）
+const popularTags = tags.sort((a, b) => b.count - a.count).slice(0, 20);
+---
+
+<MainLayout title="提问题 - SegmentFault 思否">
+  <Header slot="header" />
+
+  <div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-md border border-neutral-200 mb-6">
+      <div class="p-6 border-b border-neutral-200">
+        <h1 class="text-2xl font-bold text-neutral-800">提问题</h1>
+      </div>
+
+      <div class="p-6">
+        <form id="ask-form" class="space-y-6">
+          <!-- 标题 -->
+          <div>
+            <label for="title" class="block font-medium text-neutral-700 mb-2">问题标题</label>
+            <input
+              type="text"
+              id="title"
+              name="title"
+              class="w-full border border-neutral-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              placeholder="请输入标题，用精炼的语言描述问题"
+              required
+            />
+            <p class="text-sm text-neutral-500 mt-1">标题应该简洁明了，包含问题的关键信息</p>
+          </div>
+
+          <!-- 标签 -->
+          <div>
+            <label for="tags" class="block font-medium text-neutral-700 mb-2">标签</label>
+            <div class="relative">
+              <input
+                type="text"
+                id="tags"
+                name="tags"
+                class="w-full border border-neutral-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                placeholder="最多添加5个标签，按Enter或空格分隔"
+              />
+              <div id="tags-container" class="flex flex-wrap gap-2 mt-2"></div>
+            </div>
+            <p class="text-sm text-neutral-500 mt-1">添加相关技术标签，帮助更多专家看到您的问题</p>
+
+            <!-- 常用标签推荐 -->
+            <div class="mt-4">
+              <p class="text-sm font-medium text-neutral-700 mb-2">常用标签：</p>
+              <div class="flex flex-wrap gap-2">
+                {popularTags.map(tag => (
+                  <span
+                    class="text-xs px-2 py-1 bg-neutral-100 text-neutral-600 hover:bg-primary-50 hover:text-primary-600 rounded-md cursor-pointer tag-suggestion"
+                    data-tag={tag.name}
+                  >
+                    {tag.name}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <!-- 问题内容 -->
+          <div>
+            <label for="content" class="block font-medium text-neutral-700 mb-2">问题描述</label>
+            <div class="border border-neutral-300 rounded-md overflow-hidden">
+              <div class="bg-neutral-50 border-b border-neutral-200 p-2 flex items-center space-x-2">
+                <button type="button" class="text-neutral-500 hover:text-neutral-700 p-1 rounded">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                  </svg>
+                </button>
+                <button type="button" class="text-neutral-500 hover:text-neutral-700 p-1 rounded">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z" />
+                  </svg>
+                </button>
+                <button type="button" class="text-neutral-500 hover:text-neutral-700 p-1 rounded">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z" />
+                  </svg>
+                </button>
+                <button type="button" class="text-neutral-500 hover:text-neutral-700 p-1 rounded">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                  </svg>
+                </button>
+              </div>
+              <textarea
+                id="content"
+                name="content"
+                class="w-full p-3 min-h-[300px] focus:outline-none focus:ring-0"
+                placeholder="请详细描述您的问题，包括：
+1. 您想要实现什么？
+2. 您尝试了哪些方法？
+3. 遇到了什么错误或困难？
+4. 相关的代码或错误信息（请使用代码块格式化）"
+                required
+              ></textarea>
+            </div>
+            <p class="text-sm text-neutral-500 mt-1">支持 Markdown 语法，可添加代码块、图片等</p>
+          </div>
+
+          <!-- 提交按钮 -->
+          <div class="flex justify-between items-center pt-4">
+            <div class="text-sm text-neutral-500">
+              <a href="/help/ask" class="text-primary-500 hover:underline">如何提出一个好问题？</a>
+            </div>
+            <div>
+              <button
+                type="button"
+                class="bg-neutral-100 text-neutral-700 px-4 py-2 rounded-md hover:bg-neutral-200 transition mr-2"
+                id="preview-btn"
+              >
+                预览
+              </button>
+              <button
+                type="submit"
+                class="bg-primary-500 text-white px-4 py-2 rounded-md hover:bg-primary-600 transition"
+              >
+                发布问题
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <!-- 预览区域（默认隐藏） -->
+        <div id="preview-area" class="hidden mt-4 bg-neutral-50 border border-neutral-200 rounded-md p-6">
+          <h3 class="text-lg font-medium mb-4">预览</h3>
+          <div id="preview-content" class="prose max-w-none"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 提问指南 -->
+    <div class="bg-white rounded-md border border-neutral-200 p-6 mb-6">
+      <h2 class="text-lg font-medium text-neutral-800 mb-4">如何提出好问题？</h2>
+
+      <ul class="space-y-2 text-neutral-600">
+        <li class="flex items-start">
+          <span class="text-primary-500 mr-2">•</span>
+          <span>使用简洁明了的标题，避免使用"求助"、"紧急"等无实质内容的词语</span>
+        </li>
+        <li class="flex items-start">
+          <span class="text-primary-500 mr-2">•</span>
+          <span>详细描述问题背景、您尝试过的方法和遇到的具体错误</span>
+        </li>
+        <li class="flex items-start">
+          <span class="text-primary-500 mr-2">•</span>
+          <span>提供最小化的可复现示例代码，方便他人理解和测试</span>
+        </li>
+        <li class="flex items-start">
+          <span class="text-primary-500 mr-2">•</span>
+          <span>正确添加相关技术标签，帮助问题被合适的专家看到</span>
+        </li>
+        <li class="flex items-start">
+          <span class="text-primary-500 mr-2">•</span>
+          <span>检查拼写和格式，使用代码块来格式化代码</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <Footer slot="footer" />
+</MainLayout>
+
+<script>
+  // 标签管理
+  document.addEventListener('DOMContentLoaded', () => {
+    const tagsInput = document.getElementById('tags') as HTMLInputElement;
+    const tagsContainer = document.getElementById('tags-container') as HTMLDivElement;
+    const tagSuggestions = document.querySelectorAll('.tag-suggestion');
+    const previewBtn = document.getElementById('preview-btn') as HTMLButtonElement;
+    const previewArea = document.getElementById('preview-area') as HTMLDivElement;
+    const previewContent = document.getElementById('preview-content') as HTMLDivElement;
+    const contentTextarea = document.getElementById('content') as HTMLTextAreaElement;
+    const askForm = document.getElementById('ask-form') as HTMLFormElement;
+
+    const selectedTags: string[] = [];
+
+    // 添加标签
+    function addTag(tag: string) {
+      if (tag && !selectedTags.includes(tag) && selectedTags.length < 5) {
+        selectedTags.push(tag);
+        renderTags();
+        tagsInput.value = '';
+      }
+    }
+
+    // 渲染标签
+    function renderTags() {
+      tagsContainer.innerHTML = '';
+      selectedTags.forEach(tag => {
+        const tagElement = document.createElement('div');
+        tagElement.className = 'flex items-center bg-primary-50 text-primary-700 px-2 py-1 rounded text-sm';
+        tagElement.innerHTML = `
+          <span>${tag}</span>
+          <button type="button" class="ml-1 text-primary-500 hover:text-primary-700" data-tag="${tag}">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        `;
+        tagsContainer.appendChild(tagElement);
+
+        // 添加删除事件
+        const removeBtn = tagElement.querySelector('button');
+        if (removeBtn) {
+          removeBtn.addEventListener('click', function() {
+            const tagToRemove = this.getAttribute('data-tag');
+            if (tagToRemove) {
+              const index = selectedTags.indexOf(tagToRemove);
+              if (index !== -1) {
+                selectedTags.splice(index, 1);
+                renderTags();
+              }
+            }
+          });
+        }
+      });
+    }
+
+    // 标签输入事件
+    tagsInput?.addEventListener('keydown', (e) => {
+      if ((e.key === 'Enter' || e.key === ' ' || e.key === ',') && tagsInput.value.trim()) {
+        e.preventDefault();
+        addTag(tagsInput.value.trim());
+      }
+    });
+
+    // 标签推荐点击事件
+    tagSuggestions.forEach(suggestion => {
+      suggestion.addEventListener('click', function() {
+        const tag = this.getAttribute('data-tag');
+        if (tag) {
+          addTag(tag);
+        }
+      });
+    });
+
+    // 预览按钮事件
+    previewBtn?.addEventListener('click', () => {
+      // 这里应该有一个将markdown转换为HTML的函数
+      // 简单示例，实际应使用markdown解析库
+      const markdownContent = contentTextarea.value;
+      previewContent.innerHTML = `<p>${markdownContent.replace(/\n/g, '<br>')}</p>`;
+
+      if (previewArea.classList.contains('hidden')) {
+        previewArea.classList.remove('hidden');
+        previewBtn.textContent = '关闭预览';
+      } else {
+        previewArea.classList.add('hidden');
+        previewBtn.textContent = '预览';
+      }
+    });
+
+    // 表单提交事件
+    askForm?.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      // 收集表单数据
+      const formData = {
+        title: (document.getElementById('title') as HTMLInputElement).value,
+        tags: selectedTags,
+        content: contentTextarea.value
+      };
+
+      // 显示提交成功信息
+      alert('表单提交成功！在真实环境中，这里会将数据发送到服务器');
+      console.log('提交的数据:', formData);
+
+      // 清空表单（实际项目中可能会重定向到问题详情页）
+      askForm.reset();
+      selectedTags.length = 0;
+      renderTags();
+    });
+  });
+</script>
+
+<style>
+  /* 编辑器和预览区样式 */
+  .prose {
+    max-width: none;
+  }
+
+  .prose p {
+    margin-bottom: 1rem;
+  }
+
+  .prose h1, .prose h2, .prose h3, .prose h4 {
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+  }
+
+  .prose ul, .prose ol {
+    padding-left: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .prose li {
+    margin-bottom: 0.5rem;
+  }
+
+  /* 标签样式 */
+  .tag-suggestion {
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  /* 确保按钮有手型指针 */
+  button {
+    cursor: pointer;
+  }
+</style>

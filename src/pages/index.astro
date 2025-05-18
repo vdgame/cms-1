@@ -1,0 +1,175 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import Sidebar from '../components/Sidebar.astro';
+import QuestionCard from '../components/QuestionCard.astro';
+import Pagination from '../components/Pagination.astro';
+
+// 模拟问题数据
+const questions = [
+  {
+    id: '1010000046550995',
+    title: '数据库承高并发场景下该如何优化？',
+    votes: 0,
+    answers: 1,
+    views: 146,
+    tags: ['数据库性能优化'],
+    author: {
+      id: 'meathill',
+      name: 'Meathill',
+    },
+    createdAt: '5月 17日回答'
+  },
+  {
+    id: '1010000046551058',
+    title: 'Element UI中ElMessageBox弹窗的样式修改',
+    votes: 0,
+    answers: 0,
+    views: 72,
+    tags: ['vue.js'],
+    author: {
+      id: 'kuailedexiang',
+      name: '快乐的翔',
+    },
+    createdAt: '5月 17日提问'
+  },
+  {
+    id: '1010000046550983',
+    title: 'springboot2 AOP导致NoSuchMethodException是什么原因？',
+    votes: 0,
+    answers: 0,
+    views: 94,
+    tags: ['springboot'],
+    author: {
+      id: 'nemesiszh',
+      name: 'nemesiszh',
+    },
+    createdAt: '5月 17日提问'
+  },
+  {
+    id: '1010000046548690',
+    title: '求解，一个字符串配置的问题，求解决！！！！？',
+    votes: 0,
+    answers: 2,
+    views: 266,
+    tags: ['算法', '动态规划', '前端', '贪婪'],
+    author: {
+      id: 'sevencode',
+      name: 'Seven',
+    },
+    createdAt: '5月 17日回答'
+  },
+  {
+    id: '1010000046550585',
+    title: 'Redis使用Python Pickle序列化和Java序列化的优势？',
+    votes: 0,
+    answers: 1,
+    views: 162,
+    tags: ['java', 'python', 'redis'],
+    author: {
+      id: 'yingyongwubidehefan',
+      name: '应用无比的贺凡',
+    },
+    createdAt: '5月 17日回答'
+  },
+  {
+    id: '1010000046550587',
+    title: '为了提高执行速度，能否使用条件触发器解决？',
+    votes: 0,
+    answers: 0,
+    views: 147,
+    tags: ['postgresql', 'jsonb', '数据库性能优化', 'mysql'],
+    author: {
+      id: 'shendaowu_v2',
+      name: 'shendaowu_v2',
+    },
+    createdAt: '5月 17日提问'
+  },
+];
+---
+
+<MainLayout title="首页">
+  <Header slot="header" />
+
+  <div class="flex flex-col md:flex-row gap-4 md:gap-6">
+    <!-- 主要内容区 -->
+    <div class="w-full md:w-3/4">
+      <!-- 主页Banner -->
+      <div class="bg-gradient-to-r from-primary-600 to-secondary-500 rounded-lg mb-4 md:mb-6 overflow-hidden">
+        <div class="flex flex-col md:flex-row items-center p-4 md:p-6">
+          <div class="w-full md:w-2/3 text-white mb-4 md:mb-0">
+            <h1 class="text-xl md:text-2xl font-bold mb-2">了不起的甲骨文</h1>
+            <p class="mb-3 md:mb-4 text-sm md:text-base">「AI+甲骨文专题」，人工智能与传统文化的碰撞，一起来了解AI如何帮助我们解读中国最早的文字</p>
+            <p class="text-xs md:text-sm opacity-80">发现一个一百多年前的谜题，看看今天的AI如何解决？</p>
+          </div>
+          <div class="w-full md:w-1/3">
+            <img
+              src="https://ext.same-assets.com/3236097591/1847728408.png"
+              alt="甲骨文与AI"
+              class="w-full rounded-lg"
+              loading="lazy"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- 问题导航 -->
+      <div class="bg-white rounded-md border border-neutral-200 mb-4 md:mb-6 overflow-hidden">
+        <div class="flex overflow-x-auto border-b border-neutral-200 text-sm">
+          <a href="/" class="px-3 md:px-4 py-3 text-primary-500 border-b-2 border-primary-500 font-medium whitespace-nowrap">问答</a>
+          <a href="/blogs" class="px-3 md:px-4 py-3 text-neutral-600 hover:text-primary-500 whitespace-nowrap">最新</a>
+          <a href="/questions/hottest/weekly" class="px-3 md:px-4 py-3 text-neutral-600 hover:text-primary-500 whitespace-nowrap">热门</a>
+          <a href="/questions/hottest/monthly" class="px-3 md:px-4 py-3 text-neutral-600 hover:text-primary-500 whitespace-nowrap">月榜</a>
+          <a href="/brand/harmonyos-next/questions" class="px-3 md:px-4 py-3 text-neutral-600 hover:text-primary-500 whitespace-nowrap">HarmonyOS开发者社区</a>
+          <div class="ml-auto px-3 md:px-4 py-3">
+            <a href="/ask" class="bg-primary-500 text-white px-2 md:px-3 py-1.5 rounded text-sm hover:bg-primary-600 transition whitespace-nowrap">
+              提问题
+            </a>
+          </div>
+        </div>
+
+        <!-- 问题列表 -->
+        <div>
+          {questions.map(question => <QuestionCard question={question} />)}
+        </div>
+
+        <!-- 移动端提问悬浮按钮 -->
+        <a
+          href="/ask"
+          class="fixed right-4 bottom-20 bg-primary-500 text-white p-3 rounded-full shadow-lg z-20 flex items-center justify-center sm:hidden hover:bg-primary-600 transition"
+          aria-label="提问"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+        </a>
+      </div>
+
+      <!-- 分页 -->
+      <Pagination currentPage={1} totalPages={20} baseUrl="/?" />
+    </div>
+
+    <!-- 侧边栏 - 在移动端显示在底部或隐藏 -->
+    <div class="w-full md:w-1/4 mt-6 md:mt-0">
+      <Sidebar />
+    </div>
+  </div>
+
+  <Footer slot="footer" />
+</MainLayout>
+
+<style>
+  /* 移动端优化 */
+  @media (max-width: 640px) {
+    /* 隐藏移动端底部的边距，因为已经有了底部导航栏 */
+    .pagination-container {
+      margin-bottom: 4rem;
+    }
+
+    /* 确保内容不会被底部导航栏挡住 */
+    main {
+      padding-bottom: 5rem;
+    }
+  }
+</style>

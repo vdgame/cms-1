@@ -1,0 +1,155 @@
+---
+// 导入组件
+import SearchBar from './SearchBar.astro';
+---
+
+<div class="border-b border-neutral-200">
+  <div class="container mx-auto px-4 flex items-center justify-between h-16">
+    <!-- Logo -->
+    <a href="/" class="flex items-center">
+      <svg class="h-8 text-primary-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 30">
+        <path d="M14 6.8v16.4c0 3.2 1.6 4.8 4.8 4.8h1.6v1.6H4.8v-1.6h1.6c3.2 0 4.8-1.6 4.8-4.8V6.8c0-3.2-1.6-4.8-4.8-4.8H4.8V0h16v1.6h-1.6c-3.2.4-5.2 2-5.2 5.2z" fill="currentColor"/>
+        <path d="M27.2 6.8v16.4c0 3.2 1.6 4.8 4.8 4.8h1.6v1.6H18v-1.6h1.6c3.2 0 4.8-1.6 4.8-4.8V6.8c0-3.2-1.6-4.8-4.8-4.8H18V0h16v1.6h-1.6c-3.6.4-5.2 2-5.2 5.2zM56.8 1.6c6 0 10.8 2.4 14 6.8 3.2 4 4.8 8.8 4.8 14.4v.8H46.4c.4 3.2 2 5.6 4.4 7.2 2.4 1.6 5.2 2.4 8.8 2.4 4 0 7.6-1.2 10.8-3.6l1.2 1.6c-1.6 1.2-3.6 2.4-6 3.2-2.4.8-4.8 1.2-7.6 1.2-6 0-10.8-1.6-14-5.2-3.2-3.2-5.2-7.6-5.2-12.8 0-3.6.8-6.8 2.4-9.6 1.6-2.8 3.6-4.8 6.4-6.4 2.8-1.2 6-2 9.2-2zm12.8 20c-.4-3.2-2-6-4.4-8-2.4-2-5.2-3.2-8.8-3.2-3.2 0-6.4 1.2-8.4 3.2-2.4 2-3.6 4.8-4 8h25.6zM109.6 10.8l1.2 1.6c-3.2 2.8-5.2 6.4-5.2 10.4 0 4 2 7.6 5.2 10.4l-1.2 1.6c-1.6-1.2-3.2-2.8-4.4-4.8-1.2-2-1.6-4.4-1.6-6.8 0-2.4.4-4.8 1.6-6.8 1.2-2.4 2.8-4 4.4-5.6zM98 0c1.6 0 3.2.4 4.4 1.2 1.2.8 2.4 2 3.2 3.2.8 1.6 1.2 3.2 1.2 4.8 0 2.8-1.2 5.2-3.2 7.2-2 2-4.4 2.8-7.2 2.8H90v6.4c0 3.2 1.6 4.8 4.8 4.8h1.6v1.6H80.8v-1.6h1.6c3.2 0 4.8-1.6 4.8-4.8V6.8c0-3.2-1.6-4.8-4.8-4.8h-1.6V0H98zm-8 17.6h5.6c2 0 3.6-.8 4.8-2 1.2-1.2 2-2.8 2-4.8s-.8-3.6-2-4.8c-1.2-1.2-2.8-2-4.8-2H90v13.6z" fill="#1890ff"/>
+      </svg>
+    </a>
+
+    <!-- 搜索栏 -->
+    <div class="hidden md:block flex-grow mx-8">
+      <SearchBar />
+    </div>
+
+    <!-- 导航链接 -->
+    <nav class="hidden md:flex items-center space-x-6">
+      <a href="/questions" class="text-neutral-700 hover:text-primary-500">问答</a>
+      <a href="/blogs" class="text-neutral-700 hover:text-primary-500">博客</a>
+      <a href="/news" class="text-neutral-700 hover:text-primary-500">资讯</a>
+      <a href="/tags" class="text-neutral-700 hover:text-primary-500">标签</a>
+      <a href="/users" class="text-neutral-700 hover:text-primary-500">用户</a>
+      <a href="/events" class="text-neutral-700 hover:text-primary-500">活动</a>
+    </nav>
+
+    <!-- 登录按钮和提问按钮 -->
+    <div class="flex items-center ml-4 hidden md:flex space-x-2">
+      <a href="/ask" class="bg-primary-50 text-primary-600 border border-primary-200 px-4 py-2 rounded hover:bg-primary-100 transition">
+        提问题
+      </a>
+      <a href="/user/login" class="bg-primary-500 text-white px-4 py-2 rounded hover:bg-primary-600 transition">
+        注册登录
+      </a>
+    </div>
+
+    <!-- 移动端菜单按钮 -->
+    <button id="mobile-menu-toggle" class="md:hidden text-neutral-700">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<!-- 移动端菜单 -->
+<div id="mobile-menu" class="fixed inset-0 bg-white z-50 flex flex-col overflow-y-auto transform translate-x-full transition-transform duration-300 ease-in-out md:hidden">
+  <div class="flex items-center justify-between p-4 border-b border-neutral-200">
+    <a href="/" class="flex items-center">
+      <svg class="h-8 text-primary-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 30">
+        <path d="M14 6.8v16.4c0 3.2 1.6 4.8 4.8 4.8h1.6v1.6H4.8v-1.6h1.6c3.2 0 4.8-1.6 4.8-4.8V6.8c0-3.2-1.6-4.8-4.8-4.8H4.8V0h16v1.6h-1.6c-3.2.4-5.2 2-5.2 5.2z" fill="currentColor"/>
+        <path d="M27.2 6.8v16.4c0 3.2 1.6 4.8 4.8 4.8h1.6v1.6H18v-1.6h1.6c3.2 0 4.8-1.6 4.8-4.8V6.8c0-3.2-1.6-4.8-4.8-4.8H18V0h16v1.6h-1.6c-3.6.4-5.2 2-5.2 5.2zM56.8 1.6c6 0 10.8 2.4 14 6.8 3.2 4 4.8 8.8 4.8 14.4v.8H46.4c.4 3.2 2 5.6 4.4 7.2 2.4 1.6 5.2 2.4 8.8 2.4 4 0 7.6-1.2 10.8-3.6l1.2 1.6c-1.6 1.2-3.6 2.4-6 3.2-2.4.8-4.8 1.2-7.6 1.2-6 0-10.8-1.6-14-5.2-3.2-3.2-5.2-7.6-5.2-12.8 0-3.6.8-6.8 2.4-9.6 1.6-2.8 3.6-4.8 6.4-6.4 2.8-1.2 6-2 9.2-2zm12.8 20c-.4-3.2-2-6-4.4-8-2.4-2-5.2-3.2-8.8-3.2-3.2 0-6.4 1.2-8.4 3.2-2.4 2-3.6 4.8-4 8h25.6zM109.6 10.8l1.2 1.6c-3.2 2.8-5.2 6.4-5.2 10.4 0 4 2 7.6 5.2 10.4l-1.2 1.6c-1.6-1.2-3.2-2.8-4.4-4.8-1.2-2-1.6-4.4-1.6-6.8 0-2.4.4-4.8 1.6-6.8 1.2-2.4 2.8-4 4.4-5.6zM98 0c1.6 0 3.2.4 4.4 1.2 1.2.8 2.4 2 3.2 3.2.8 1.6 1.2 3.2 1.2 4.8 0 2.8-1.2 5.2-3.2 7.2-2 2-4.4 2.8-7.2 2.8H90v6.4c0 3.2 1.6 4.8 4.8 4.8h1.6v1.6H80.8v-1.6h1.6c3.2 0 4.8-1.6 4.8-4.8V6.8c0-3.2-1.6-4.8-4.8-4.8h-1.6V0H98zm-8 17.6h5.6c2 0 3.6-.8 4.8-2 1.2-1.2 2-2.8 2-4.8s-.8-3.6-2-4.8c-1.2-1.2-2.8-2-4.8-2H90v13.6z" fill="#1890ff"/>
+      </svg>
+    </a>
+    <button id="mobile-menu-close" class="text-neutral-700">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+    </button>
+  </div>
+
+  <!-- 移动端搜索栏 -->
+  <div class="p-4 border-b border-neutral-200">
+    <SearchBar />
+  </div>
+
+  <!-- 移动端导航链接 -->
+  <nav class="flex flex-col p-4 space-y-4">
+    <a href="/questions" class="text-lg font-medium text-neutral-800 hover:text-primary-500 py-2 border-b border-neutral-100">问答</a>
+    <a href="/blogs" class="text-lg font-medium text-neutral-800 hover:text-primary-500 py-2 border-b border-neutral-100">博客</a>
+    <a href="/news" class="text-lg font-medium text-neutral-800 hover:text-primary-500 py-2 border-b border-neutral-100">资讯</a>
+    <a href="/tags" class="text-lg font-medium text-neutral-800 hover:text-primary-500 py-2 border-b border-neutral-100">标签</a>
+    <a href="/users" class="text-lg font-medium text-neutral-800 hover:text-primary-500 py-2 border-b border-neutral-100">用户</a>
+    <a href="/events" class="text-lg font-medium text-neutral-800 hover:text-primary-500 py-2 border-b border-neutral-100">活动</a>
+    <a href="/ask" class="text-lg font-medium text-primary-600 hover:text-primary-800 py-2 border-b border-neutral-100">提问题</a>
+  </nav>
+
+  <!-- 移动端热门标签 -->
+  <div class="p-4 border-t border-neutral-200">
+    <h3 class="text-lg font-medium text-neutral-800 mb-3">热门标签</h3>
+    <div class="flex flex-wrap gap-2">
+      <a href="/t/javascript" class="text-sm text-neutral-600 hover:text-primary-500 bg-neutral-100 px-2 py-1 rounded">javascript</a>
+      <a href="/t/python" class="text-sm text-neutral-600 hover:text-primary-500 bg-neutral-100 px-2 py-1 rounded">python</a>
+      <a href="/t/node.js" class="text-sm text-neutral-600 hover:text-primary-500 bg-neutral-100 px-2 py-1 rounded">node.js</a>
+      <a href="/t/react" class="text-sm text-neutral-600 hover:text-primary-500 bg-neutral-100 px-2 py-1 rounded">react</a>
+      <a href="/t/vue.js" class="text-sm text-neutral-600 hover:text-primary-500 bg-neutral-100 px-2 py-1 rounded">vue.js</a>
+      <a href="/t/php" class="text-sm text-neutral-600 hover:text-primary-500 bg-neutral-100 px-2 py-1 rounded">php</a>
+    </div>
+  </div>
+
+  <!-- 移动端登录按钮 -->
+  <div class="p-4 mt-auto border-t border-neutral-200">
+    <a href="/user/login" class="block w-full bg-primary-500 text-white px-4 py-3 rounded text-center font-medium hover:bg-primary-600 transition">
+      注册登录
+    </a>
+  </div>
+</div>
+
+<!-- 热门标签导航 -->
+<div class="bg-white py-2 px-4 overflow-x-auto whitespace-nowrap hidden md:block">
+  <div class="container mx-auto flex items-center space-x-4">
+    <a href="/t/javascript" class="text-sm text-neutral-600 hover:text-primary-500">javascript</a>
+    <a href="/t/python" class="text-sm text-neutral-600 hover:text-primary-500">python</a>
+    <a href="/t/node.js" class="text-sm text-neutral-600 hover:text-primary-500">node.js</a>
+    <a href="/t/react" class="text-sm text-neutral-600 hover:text-primary-500">react</a>
+    <a href="/t/vue.js" class="text-sm text-neutral-600 hover:text-primary-500">vue.js</a>
+    <a href="/t/php" class="text-sm text-neutral-600 hover:text-primary-500">php</a>
+    <a href="/t/laravel" class="text-sm text-neutral-600 hover:text-primary-500">laravel</a>
+    <a href="/t/go" class="text-sm text-neutral-600 hover:text-primary-500">go</a>
+    <a href="/t/mysql" class="text-sm text-neutral-600 hover:text-primary-500">mysql</a>
+    <a href="/t/linux" class="text-sm text-neutral-600 hover:text-primary-500">linux</a>
+    <a href="/t/java" class="text-sm text-neutral-600 hover:text-primary-500">java</a>
+    <a href="/t/android" class="text-sm text-neutral-600 hover:text-primary-500">android</a>
+  </div>
+</div>
+
+<!-- 移动端菜单覆盖层 -->
+<div id="mobile-menu-overlay" class="fixed inset-0 bg-black opacity-50 z-40 hidden md:hidden"></div>
+
+<script>
+  // 移动端菜单切换
+  document.addEventListener('DOMContentLoaded', () => {
+    const toggleButton = document.getElementById('mobile-menu-toggle');
+    const closeButton = document.getElementById('mobile-menu-close');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const overlay = document.getElementById('mobile-menu-overlay');
+
+    // 打开菜单
+    toggleButton?.addEventListener('click', () => {
+      mobileMenu?.classList.remove('translate-x-full');
+      overlay?.classList.remove('hidden');
+      document.body.style.overflow = 'hidden'; // 防止背景滚动
+    });
+
+    // 关闭菜单
+    const closeMenu = () => {
+      mobileMenu?.classList.add('translate-x-full');
+      overlay?.classList.add('hidden');
+      document.body.style.overflow = ''; // 恢复滚动
+    };
+
+    closeButton?.addEventListener('click', closeMenu);
+    overlay?.addEventListener('click', closeMenu);
+
+    // 在菜单内的链接点击后自动关闭菜单
+    const menuLinks = mobileMenu?.querySelectorAll('a');
+    menuLinks?.forEach(link => {
+      link.addEventListener('click', closeMenu);
+    });
+  });
+</script>

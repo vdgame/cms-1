@@ -1,0 +1,131 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import TagCard from '../../components/TagCard.astro';
+import Pagination from '../../components/Pagination.astro';
+
+// 模拟标签数据
+const tags = [
+  {
+    id: 'javascript',
+    name: 'javascript',
+    description: 'JavaScript是一种高级的、解释型的编程语言。JavaScript是一门基于原型、函数先行的语言，是一门多范式的语言，它支持面向对象编程，命令式编程，以及函数式编程。',
+    count: 213411,
+    icon: 'https://ext.same-assets.com/893243305/508485756.png'
+  },
+  {
+    id: 'frontend',
+    name: '前端',
+    description: 'Web前端开发是从网页制作演变而来的，名称上有很明显的时代特征。随着互联网的发展，网页制作不再是Web开发最重要的部分，但需要掌握的技术更加丰富、专业性更强。',
+    count: 102874,
+  },
+  {
+    id: 'php',
+    name: 'php',
+    description: 'PHP（Hypertext Preprocessor）是一种被广泛应用的开源通用计算机脚本语言，尤其适用于网络开发并可嵌入HTML中使用。PHP的语法借鉴吸收C语言、Java和Perl等流行计算机语言的特点。',
+    count: 59636,
+  },
+  {
+    id: 'vue.js',
+    name: 'vue.js',
+    description: 'Reactive Components for Modern Web Interfaces. Vue.js是一套构建用户界面的渐进式框架。与其他重量级框架不同的是，Vue从根本上采用最小成本、渐进增量的设计。',
+    count: 68542,
+  },
+  {
+    id: 'css',
+    name: 'css',
+    description: 'Cascading Style Sheets，层叠样式表，是一种用来为结构化文档添加样式的计算机语言，由W3C定义和维护。',
+    count: 44695,
+  },
+  {
+    id: 'html',
+    name: 'html',
+    description: 'HyperText Markup Language（超文本标记语言）是一种用于创建网页的标准标记语言。HTML是一种基础技术，常与CSS、JavaScript一起被众多网站用于设计网页、网页应用程序以及移动应用程序的用户界面。',
+    count: 50722,
+  },
+  {
+    id: 'java',
+    name: 'java',
+    description: 'Java是由Sun Microsystems公司于1995年5月推出的Java程序设计语言和Java平台的总称。Java语言是一种可以撰写跨平台应用软件的面向对象的程序设计语言。',
+    count: 109756,
+    icon: 'https://ext.same-assets.com/893243305/1693182776.png'
+  },
+  {
+    id: 'html5',
+    name: 'html5',
+    description: 'HTML5是HTML的第五个修订版本，是近年来被广泛应用的一种网页制作标准。HTML5的设计目的是为了在移动设备上支持多媒体。HTML5引入了新的语法特征，比如video、audio和canvas标记。',
+    count: 40217,
+  },
+  {
+    id: 'node.js',
+    name: 'node.js',
+    description: 'Node.js是一个基于Chrome V8引擎的JavaScript运行环境，使用了事件驱动、非阻塞式I/O模型，为JavaScript提供了在服务器端运行的能力，使得JavaScript成为与PHP、Python、Perl等服务器端语言平起平坐的脚本语言。',
+    count: 38032,
+  },
+  {
+    id: 'python',
+    name: 'python',
+    description: 'Python是一种广泛使用的高级编程语言，以其简洁、易读的语法和强大的库支持著称。它支持多种编程范式，包括面向对象、命令式、函数式和过程式。',
+    count: 64468,
+    icon: 'https://ext.same-assets.com/893243305/1836260593.png'
+  },
+  {
+    id: 'react',
+    name: 'react',
+    description: 'React是一个用于构建用户界面的JavaScript库，主要用于构建UI，很多人认为React是MVC中的V（视图）。React起源于Facebook的内部项目，用来架设Instagram的网站，并于2013年5月开源。',
+    count: 25383,
+  },
+  {
+    id: 'mysql',
+    name: 'mysql',
+    description: 'MySQL是一个开源的关系型数据库管理系统，由瑞典MySQL AB公司开发，目前属于Oracle公司。MySQL是最流行的关系型数据库管理系统之一，在WEB应用方面，MySQL是最好的RDBMS应用软件之一。',
+    count: 26849,
+    icon: 'https://ext.same-assets.com/893243305/371494761.png'
+  },
+];
+---
+
+<MainLayout title="标签">
+  <Header slot="header" />
+
+  <div class="container mx-auto">
+    <div class="bg-white rounded-md border border-neutral-200 p-6 mb-6">
+      <h1 class="text-xl font-medium text-neutral-800 mb-2">标签</h1>
+      <p class="text-sm text-neutral-600">标签不仅能组织和归类你的内容，它还能关联到相似的内容和感兴趣的人，文章添加标签是一个好习惯。</p>
+
+      <!-- 搜索和筛选 -->
+      <div class="mt-4 flex flex-col md:flex-row gap-4">
+        <div class="md:w-1/3">
+          <input
+            type="text"
+            placeholder="搜索标签"
+            class="w-full px-4 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+          />
+        </div>
+
+        <div class="flex gap-2">
+          <button class="px-4 py-2 bg-primary-500 text-white rounded-md hover:bg-primary-600 transition">
+            热门
+          </button>
+          <button class="px-4 py-2 bg-white border border-neutral-300 text-neutral-600 rounded-md hover:bg-neutral-50 transition">
+            字母序
+          </button>
+          <button class="px-4 py-2 bg-white border border-neutral-300 text-neutral-600 rounded-md hover:bg-neutral-50 transition">
+            最新
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 标签列表 -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-6">
+      {tags.map(tag => <TagCard tag={tag} />)}
+    </div>
+
+    <!-- 分页 -->
+    <Pagination currentPage={1} totalPages={10} baseUrl="/tags?sort=hottest&"/>
+  </div>
+
+  <Footer slot="footer" />
+</MainLayout>

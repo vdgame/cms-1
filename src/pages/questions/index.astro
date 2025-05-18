@@ -1,0 +1,100 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import Sidebar from '../../components/Sidebar.astro';
+import QuestionCard from '../../components/QuestionCard.astro';
+import Pagination from '../../components/Pagination.astro';
+import { formatDate } from '../../utils/format';
+import { questions as allQuestions } from '../../data/mockData';
+
+// 获取查询参数
+const page = parseInt(Astro.url.searchParams.get('page') || '1');
+const tag = Astro.url.searchParams.get('tag');
+const status = Astro.url.searchParams.get('status');
+const search = Astro.url.searchParams.get('search')?.toLowerCase();
+
+// 处理过滤
+let filteredQuestions = [...allQuestions];
+
+if (tag) {
+  filteredQuestions = filteredQuestions.filter(q =>
+    q.tags.includes(tag)
+  );
+}
+
+if (status) {
+  filteredQuestions = filteredQuestions.filter(q =>
+    q.status === status
+  );
+}
+
+if (search) {
+  filteredQuestions = filteredQuestions.filter(q =>
+    q.title.toLowerCase().includes(search) ||
+    q.content.toLowerCase().includes(search)
+  );
+}
+
+// 排序（最新优先）
+filteredQuestions.sort((a, b) =>
+  new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+);
+
+// 分页
+const limit = 10;
+const startIndex = (page - 1) * limit;
+const endIndex = page * limit;
+const questions = filteredQuestions.slice(startIndex, endIndex);
+const totalPages = Math.ceil(filteredQuestions.length / limit);
+---
+
+<MainLayout title="技术问答">
+  <Header slot="header" />
+
+  <div class="flex flex-col md:flex-row gap-6">
+    <!-- 主要内容区 -->
+    <div class="md:w-3/4">
+      <!-- 问题导航 -->
+      <div class="bg-white rounded-md border border-neutral-200 mb-6">
+        <div class="flex border-b border-neutral-200 text-sm">
+          <a href="/questions" class="px-4 py-3 text-primary-500 border-b-2 border-primary-500 font-medium">最新</a>
+          <a href="/questions?status=unanswered" class="px-4 py-3 text-neutral-600 hover:text-primary-500">待解决</a>
+          <a href="/questions?sort=hot&period=weekly" class="px-4 py-3 text-neutral-600 hover:text-primary-500">热门</a>
+          <a href="/questions?sort=hot&period=monthly" class="px-4 py-3 text-neutral-600 hover:text-primary-500">月榜</a>
+          <a href="/brand/harmonyos-next/questions" class="px-4 py-3 text-neutral-600 hover:text-primary-500">HarmonyOS开发者社区</a>
+          <div class="ml-auto px-4 py-3">
+            <a href="/ask" class="bg-primary-500 text-white px-3 py-1.5 rounded text-sm hover:bg-primary-600 transition">
+              提问题
+            </a>
+          </div>
+        </div>
+
+        <!-- 问题列表 -->
+        <div>
+          {questions.length === 0 ? (
+            <div class="text-center py-12">
+              <p class="text-neutral-500">暂无符合条件的问题</p>
+            </div>
+          ) : (
+            questions.map(question => <QuestionCard question={question} />)
+          )}
+        </div>
+      </div>
+
+      <!-- 分页 -->
+      <Pagination
+        currentPage={page}
+        totalPages={totalPages}
+        baseUrl="/questions?"
+      />
+    </div>
+
+    <!-- 侧边栏 -->
+    <div class="md:w-1/4">
+      <Sidebar />
+    </div>
+  </div>
+
+  <Footer slot="footer" />
+</MainLayout>

@@ -1,0 +1,144 @@
+---
+interface Props {
+  tag: {
+    id: string;
+    name: string;
+    count: number;
+    icon?: string;
+    description?: string;
+  };
+}
+
+const { tag } = Astro.props;
+// Default description if not provided
+const description = tag.description || `有关 ${tag.name} 的问题和文章集合，包括最新教程、用例和常见问题解答。`;
+---
+
+<div class="bg-white border border-neutral-200 rounded-md p-4 h-full">
+  <div class="flex flex-col h-full">
+    <div class="flex items-start mb-3">
+      {tag.icon ? (
+        <img src={tag.icon} alt={tag.name} class="w-5 h-5 mr-2" />
+      ) : (
+        <div class="w-5 h-5 rounded bg-primary-100 text-primary-500 flex items-center justify-center mr-2">
+          <span class="text-xs">{tag.name.charAt(0).toUpperCase()}</span>
+        </div>
+      )}
+      <a href={`/t/${tag.id}`} class="text-base font-medium text-neutral-800 hover:text-primary-600">
+        {tag.name}
+      </a>
+    </div>
+
+    <p class="text-sm text-neutral-600 flex-grow mb-3 line-clamp-3">
+      {description}
+    </p>
+
+    <div class="text-sm text-neutral-500">
+      {tag.count.toLocaleString()} 相关内容
+    </div>
+
+    <button
+      class="follow-tag-btn mt-3 text-center text-sm text-primary-500 border border-primary-500 rounded-md py-1 hover:bg-primary-50 transition"
+      data-tag-id={tag.id}
+      data-tag-name={tag.name}
+    >
+      关注标签
+    </button>
+  </div>
+</div>
+
+<script>
+  // 标签关注功能
+  document.addEventListener('DOMContentLoaded', () => {
+    // 获取已关注的标签
+    function getFollowedTags() {
+      const followedTags = localStorage.getItem('sf_followed_tags');
+      return followedTags ? JSON.parse(followedTags) : [];
+    }
+
+    // 保存已关注的标签
+    function saveFollowedTags(tags) {
+      localStorage.setItem('sf_followed_tags', JSON.stringify(tags));
+    }
+
+    // 更新关注按钮状态
+    function updateFollowButtons() {
+      const followedTags = getFollowedTags();
+
+      document.querySelectorAll('.follow-tag-btn').forEach(btn => {
+        const tagId = btn.dataset.tagId;
+        const isFollowed = followedTags.some(tag => tag.id === tagId);
+
+        if (isFollowed) {
+          btn.classList.remove('text-primary-500', 'border-primary-500');
+          btn.classList.add('bg-primary-500', 'text-white');
+          btn.textContent = '已关注';
+        } else {
+          btn.classList.add('text-primary-500', 'border-primary-500');
+          btn.classList.remove('bg-primary-500', 'text-white');
+          btn.textContent = '关注标签';
+        }
+      });
+    }
+
+    // 初始化关注按钮状态
+    updateFollowButtons();
+
+    // 关注/取消关注标签
+    document.querySelectorAll('.follow-tag-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tagId = btn.dataset.tagId;
+        const tagName = btn.dataset.tagName;
+        const followedTags = getFollowedTags();
+        const isFollowed = followedTags.some(tag => tag.id === tagId);
+
+        if (isFollowed) {
+          // 取消关注
+          const updatedTags = followedTags.filter(tag => tag.id !== tagId);
+          saveFollowedTags(updatedTags);
+
+          // 显示通知
+          const notification = document.createElement('div');
+          notification.className = 'fixed top-4 right-4 bg-white p-3 rounded-md shadow-md z-50 text-neutral-700 flex items-center';
+          notification.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-primary-500" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            </svg>
+            已取消关注 <span class="font-medium">${tagName}</span> 标签
+          `;
+          document.body.appendChild(notification);
+
+          setTimeout(() => {
+            notification.style.opacity = '0';
+            notification.style.transition = 'opacity 0.5s';
+            setTimeout(() => notification.remove(), 500);
+          }, 2000);
+        } else {
+          // 添加关注
+          followedTags.push({ id: tagId, name: tagName });
+          saveFollowedTags(followedTags);
+
+          // 显示通知
+          const notification = document.createElement('div');
+          notification.className = 'fixed top-4 right-4 bg-white p-3 rounded-md shadow-md z-50 text-neutral-700 flex items-center';
+          notification.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-primary-500" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            </svg>
+            已关注 <span class="font-medium">${tagName}</span> 标签
+          `;
+          document.body.appendChild(notification);
+
+          setTimeout(() => {
+            notification.style.opacity = '0';
+            notification.style.transition = 'opacity 0.5s';
+            setTimeout(() => notification.remove(), 500);
+          }, 2000);
+        }
+
+        // 更新按钮状态
+        updateFollowButtons();
+      });
+    });
+  });
+</script>

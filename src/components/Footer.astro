@@ -1,0 +1,126 @@
+---
+// 页脚组件
+---
+
+<div class="container mx-auto py-6 md:py-10 px-4">
+  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 md:gap-8">
+    <!-- 思否旗下产品 -->
+    <div>
+      <h3 class="text-sm font-semibold text-neutral-700 mb-3 md:mb-4">思否旗下产品</h3>
+      <ul class="space-y-2 text-xs md:text-sm">
+        <li><a href="/" class="text-neutral-600 hover:text-primary-500">SegmentFault</a></li>
+        <li><a href="/" class="text-neutral-600 hover:text-primary-500">思否企业服务</a></li>
+        <li><a href="/" class="text-neutral-600 hover:text-primary-500">思否公开课</a></li>
+        <li><a href="/" class="text-neutral-600 hover:text-primary-500">思否企业问答</a></li>
+      </ul>
+    </div>
+
+    <!-- ONES 旗下产品 -->
+    <div>
+      <h3 class="text-sm font-semibold text-neutral-700 mb-3 md:mb-4">ONES 旗下产品</h3>
+      <ul class="space-y-2 text-xs md:text-sm">
+        <li><a href="/" class="text-neutral-600 hover:text-primary-500">ONES</a></li>
+        <li><a href="/" class="text-neutral-600 hover:text-primary-500">Tower</a></li>
+        <li><a href="/" class="text-neutral-600 hover:text-primary-500">为知笔记</a></li>
+        <li><a href="/" class="text-neutral-600 hover:text-primary-500">企业问答</a></li>
+        <li class="hidden sm:block"><a href="/" class="text-neutral-600 hover:text-primary-500">ONES.com</a></li>
+        <li class="hidden sm:block"><a href="/" class="text-neutral-600 hover:text-primary-500">项目管理百科</a></li>
+      </ul>
+    </div>
+
+    <!-- 资源 -->
+    <div>
+      <h3 class="text-sm font-semibold text-neutral-700 mb-3 md:mb-4">资源</h3>
+      <ul class="space-y-2 text-xs md:text-sm">
+        <li><a href="/" class="text-neutral-600 hover:text-primary-500">每周精选</a></li>
+        <li><a href="/" class="text-neutral-600 hover:text-primary-500">用户排行榜</a></li>
+        <li><a href="/" class="text-neutral-600 hover:text-primary-500">帮助中心</a></li>
+        <li><a href="/" class="text-neutral-600 hover:text-primary-500">建议反馈</a></li>
+        <li class="hidden sm:block"><a href="/" class="text-neutral-600 hover:text-primary-500">声望</a></li>
+        <li class="hidden sm:block"><a href="/" class="text-neutral-600 hover:text-primary-500">勋章</a></li>
+      </ul>
+    </div>
+
+    <!-- 合作 -->
+    <div class="hidden sm:block">
+      <h3 class="text-sm font-semibold text-neutral-700 mb-3 md:mb-4">合作</h3>
+      <ul class="space-y-2 text-xs md:text-sm">
+        <li><a href="/" class="text-neutral-600 hover:text-primary-500">关于我们</a></li>
+        <li><a href="/" class="text-neutral-600 hover:text-primary-500">广告投放</a></li>
+        <li><a href="/" class="text-neutral-600 hover:text-primary-500">联系我们</a></li>
+        <li><a href="/" class="text-neutral-600 hover:text-primary-500">合作伙伴</a></li>
+      </ul>
+    </div>
+
+    <!-- 关注 -->
+    <div class="hidden sm:block">
+      <h3 class="text-sm font-semibold text-neutral-700 mb-3 md:mb-4">关注</h3>
+      <ul class="space-y-2 text-xs md:text-sm">
+        <li><a href="/" class="text-neutral-600 hover:text-primary-500">产品技术日志</a></li>
+        <li><a href="/" class="text-neutral-600 hover:text-primary-500">社区运营日志</a></li>
+        <li><a href="/" class="text-neutral-600 hover:text-primary-500">市场运营日志</a></li>
+        <li><a href="/" class="text-neutral-600 hover:text-primary-500">社区访谈</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 移动端折叠菜单 -->
+  <div class="block sm:hidden mt-6">
+    <details class="group">
+      <summary class="flex items-center justify-between cursor-pointer py-2 text-sm font-medium text-neutral-700 border-t border-neutral-200">
+        更多链接
+        <svg class="w-4 h-4 transition-transform transform group-open:rotate-180" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+        </svg>
+      </summary>
+      <div class="pt-2 pb-4 grid grid-cols-2 gap-4 text-xs">
+        <div>
+          <h4 class="font-medium text-neutral-700 mb-2">合作</h4>
+          <ul class="space-y-2">
+            <li><a href="/" class="text-neutral-600 hover:text-primary-500">关于我们</a></li>
+            <li><a href="/" class="text-neutral-600 hover:text-primary-500">广告投放</a></li>
+            <li><a href="/" class="text-neutral-600 hover:text-primary-500">联系我们</a></li>
+            <li><a href="/" class="text-neutral-600 hover:text-primary-500">合作伙伴</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-medium text-neutral-700 mb-2">关注</h4>
+          <ul class="space-y-2">
+            <li><a href="/" class="text-neutral-600 hover:text-primary-500">产品技术日志</a></li>
+            <li><a href="/" class="text-neutral-600 hover:text-primary-500">社区运营日志</a></li>
+            <li><a href="/" class="text-neutral-600 hover:text-primary-500">市场运营日志</a></li>
+            <li><a href="/" class="text-neutral-600 hover:text-primary-500">社区访谈</a></li>
+          </ul>
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <!-- 分隔线 -->
+  <div class="border-t border-neutral-200 my-4 md:my-8"></div>
+
+  <!-- 版权信息 -->
+  <div class="text-center text-xs md:text-sm text-neutral-600">
+    <p>Copyright © 2011-2025 SegmentFault. 当前显示版本 25.05.09</p>
+    <p class="mt-2">
+      <a href="/" class="hover:text-primary-500">浙ICP备15005796号-2</a> ·
+      <a href="/" class="hover:text-primary-500">浙公网安备33010602002000号</a> ·
+      <a href="/" class="hover:text-primary-500">ICP经营许可 浙B2-20201554</a>
+    </p>
+    <p class="mt-2">杭州堆栈科技有限公司版权所有</p>
+  </div>
+
+  <!-- 网站宗旨 -->
+  <div class="text-center md:text-right text-xs md:text-sm text-neutral-600 mt-4">
+    <p>思否 - 凝聚集体智慧，推动技术进步</p>
+  </div>
+</div>
+
+<style>
+  /* 防止移动端底部导航栏遮挡底部内容 */
+  @media (max-width: 640px) {
+    .container {
+      padding-bottom: 4rem;
+    }
+  }
+</style>

@@ -1,0 +1,152 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import QuestionCard from '../components/QuestionCard.astro';
+import Pagination from '../components/Pagination.astro';
+import { questionService } from '../services';
+
+// 获取搜索参数
+const searchQuery = Astro.url.searchParams.get('q') || '';
+const searchType = Astro.url.searchParams.get('type') || 'all';
+const page = parseInt(Astro.url.searchParams.get('page') || '1');
+const limit = 10;
+const order = Astro.url.searchParams.get('order') || 'newest';
+
+// 如果没有搜索查询，重定向到首页
+if (!searchQuery) {
+  return Astro.redirect('/');
+}
+
+// 从API获取搜索结果
+const results = await questionService.searchQuestions(searchQuery, searchType, page, limit);
+const { questions, pagination } = results;
+
+// 获取搜索类型显示文本
+function getSearchTypeLabel(type: string) {
+  switch (type) {
+    case 'tag':
+      return '标签';
+    case 'content':
+      return '内容';
+    case 'author':
+      return '作者';
+    default:
+      return '全部';
+  }
+}
+
+// 高亮搜索关键词
+function highlightKeyword(text: string, keyword: string) {
+  if (!keyword.trim()) return text;
+  const regex = new RegExp(`(${keyword})`, 'gi');
+  return text.replace(regex, '<span class="bg-yellow-200">$1</span>');
+}
+---
+
+<MainLayout title={`"${searchQuery}" 的搜索结果`}>
+  <div class="container mx-auto px-4 py-8">
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+      <h1 class="text-2xl font-bold text-gray-800 mb-2">"{searchQuery}" 的搜索结果</h1>
+      <p class="text-gray-600">共找到 {pagination.totalItems} 个结果</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <!-- 搜索过滤器 -->
+      <div class="md:col-span-1">
+        <div class="bg-white rounded-lg shadow-md p-6 sticky top-4">
+          <h2 class="text-lg font-semibold mb-4">搜索过滤</h2>
+
+          <div class="mb-4">
+            <h3 class="text-md font-medium mb-2">类型</h3>
+            <div class="space-y-2">
+              <a href={`/search?q=${searchQuery}&type=all&order=${order}`} class={`block px-3 py-2 rounded ${searchType === 'all' ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'}`}>全部</a>
+              <a href={`/search?q=${searchQuery}&type=content&order=${order}`} class={`block px-3 py-2 rounded ${searchType === 'content' ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'}`}>内容</a>
+              <a href={`/search?q=${searchQuery}&type=tag&order=${order}`} class={`block px-3 py-2 rounded ${searchType === 'tag' ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'}`}>标签</a>
+              <a href={`/search?q=${searchQuery}&type=author&order=${order}`} class={`block px-3 py-2 rounded ${searchType === 'author' ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'}`}>作者</a>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="text-md font-medium mb-2">排序</h3>
+            <div class="space-y-2">
+              <a href={`/search?q=${searchQuery}&type=${searchType}&order=newest`} class={`block px-3 py-2 rounded ${order === 'newest' ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'}`}>最新</a>
+              <a href={`/search?q=${searchQuery}&type=${searchType}&order=votes`} class={`block px-3 py-2 rounded ${order === 'votes' ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'}`}>得票最多</a>
+              <a href={`/search?q=${searchQuery}&type=${searchType}&order=relevance`} class={`block px-3 py-2 rounded ${order === 'relevance' ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'}`}>相关度</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 搜索结果 -->
+      <div class="md:col-span-3">
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <div class="mb-4 flex items-center justify-between">
+            <h2 class="text-xl font-semibold">{getSearchTypeLabel(searchType)} 搜索结果</h2>
+          </div>
+
+          {questions.length === 0 ? (
+            <div class="text-center py-8">
+              <p class="text-gray-500 mb-2">没有找到与 "{searchQuery}" 相关的结果</p>
+              <p class="text-gray-500">尝试其他关键词或减少筛选条件</p>
+            </div>
+          ) : (
+            <div class="space-y-6">
+              {questions.map((question: any) => (
+                <QuestionCard
+                  id={question.id}
+                  title={question.title}
+                  content={question.content}
+                  tags={question.tags}
+                  votes={question.votes}
+                  answers={question.answers}
+                  views={question.views}
+                  author={question.author}
+                  createdAt={question.createdAt}
+                  status={question.status}
+                  isSolved={Boolean(question.isSolved)}
+                  highlightKeyword={searchType !== 'tag' && searchType !== 'author' ? searchQuery : ''}
+                />
+              ))}
+
+              {pagination.totalPages > 1 && (
+                <Pagination
+                  currentPage={pagination.currentPage}
+                  totalPages={pagination.totalPages}
+                  baseUrl={`/search?q=${searchQuery}&type=${searchType}&order=${order}`}
+                />
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  </div>
+</MainLayout>
+
+<script>
+  // 高亮搜索关键字
+  document.addEventListener('DOMContentLoaded', () => {
+    // 获取URL参数中的搜索关键字
+    const urlParams = new URLSearchParams(window.location.search);
+    const query = urlParams.get('q') || '';
+    const searchType = urlParams.get('type') || 'all';
+
+    // 跳过标签搜索和作者搜索
+    if (searchType === 'tag' || searchType === 'author') return;
+
+    if (query) {
+      // 高亮标题中的关键字
+      document.querySelectorAll('.question-title').forEach(element => {
+        const title = element.textContent || '';
+        const regex = new RegExp(`(${query})`, 'gi');
+        element.innerHTML = title.replace(regex, '<span class="bg-yellow-200">$1</span>');
+      });
+
+      // 高亮内容中的关键字
+      document.querySelectorAll('.question-excerpt').forEach(element => {
+        const content = element.textContent || '';
+        const regex = new RegExp(`(${query})`, 'gi');
+        element.innerHTML = content.replace(regex, '<span class="bg-yellow-200">$1</span>');
+      });
+    }
+  });
+</script>

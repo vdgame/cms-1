@@ -1,0 +1,154 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import UserCard from '../../components/UserCard.astro';
+import Pagination from '../../components/Pagination.astro';
+
+// 模拟用户数据
+const users = [
+  {
+    id: 'harmonyosmashangqixing',
+    name: 'HarmonyOS码上奇行',
+    avatar: 'https://ext.same-assets.com/2042508087/1778551482.png',
+    reputation: 110,
+    tags: [
+      { id: 'harmonyos', name: 'harmonyos' },
+      { id: 'javascript', name: 'javascript' },
+      { id: 'arkts', name: 'arkts' }
+    ],
+    bio: 'HarmonyOS技术专家，致力于开源项目和技术分享'
+  },
+  {
+    id: 'meathill',
+    name: 'Meathill',
+    avatar: 'https://ext.same-assets.com/2042508087/1164089140.jpeg',
+    reputation: 89,
+    tags: [
+      { id: 'javascript', name: 'javascript' },
+      { id: 'php', name: 'php' },
+      { id: 'node.js', name: 'node.js' }
+    ],
+    bio: '全栈开发工程师，擅长Web前端开发和技术分享'
+  },
+  {
+    id: 'feimameng',
+    name: '非马梦衡',
+    avatar: 'https://ext.same-assets.com/2042508087/849384176.png',
+    reputation: 58,
+    tags: [
+      { id: 'python', name: 'python' },
+      { id: 'machine-learning', name: 'machine-learning' },
+      { id: 'data-analysis', name: 'data-analysis' }
+    ],
+    bio: '机器学习工程师，专注于数据分析和人工智能应用'
+  },
+  {
+    id: '42_6398721f10a5e',
+    name: '42',
+    reputation: 47,
+    tags: [
+      { id: 'go', name: 'go' },
+      { id: 'distributed-systems', name: 'distributed-systems' },
+      { id: 'microservices', name: 'microservices' }
+    ],
+    bio: '后端工程师，专注于分布式系统和微服务架构'
+  },
+  {
+    id: 'siesta_62835e5dc44a1',
+    name: 'Siesta',
+    avatar: 'https://ext.same-assets.com/2042508087/4130015858.jpeg',
+    reputation: 41,
+    tags: [
+      { id: 'vue.js', name: 'vue.js' },
+      { id: 'react', name: 'react' },
+      { id: 'frontend', name: '前端' }
+    ],
+    bio: '前端开发工程师，Vue和React技术专家'
+  },
+  {
+    id: 'smallhuifei',
+    name: 'smallStone',
+    reputation: 37,
+    tags: [
+      { id: 'java', name: 'java' },
+      { id: 'spring', name: 'spring' },
+      { id: 'backend', name: '后端' }
+    ],
+    bio: 'Java后端开发工程师，Spring技术专家'
+  },
+  {
+    id: 'demaozi_65b5b69aa947b',
+    name: '得猫子',
+    avatar: 'https://ext.same-assets.com/2042508087/3411876372.webp',
+    reputation: 35,
+    tags: [
+      { id: 'android', name: 'android' },
+      { id: 'kotlin', name: 'kotlin' },
+      { id: 'mobile', name: 'mobile' }
+    ],
+    bio: '移动端开发工程师，专注于Android平台开发'
+  },
+  {
+    id: 'idyun',
+    name: '开发者小助手',
+    avatar: 'https://ext.same-assets.com/2042508087/1721369266.png',
+    reputation: 33,
+    tags: [
+      { id: 'ai', name: 'ai' },
+      { id: 'cloud', name: 'cloud' },
+      { id: 'devops', name: 'devops' }
+    ],
+    bio: '技术社区贡献者，擅长人工智能和云服务'
+  },
+];
+---
+
+<MainLayout title="用户排行榜">
+  <Header slot="header" />
+
+  <div class="container mx-auto">
+    <div class="bg-white rounded-md border border-neutral-200 p-6 mb-6">
+      <h1 class="text-xl font-medium text-neutral-800 mb-6">社区贡献榜</h1>
+      <p class="text-sm text-neutral-600 mb-4">这里是社区用户的贡献排行榜，他们为社区贡献了不可磨灭的力量，帮助更多人得到了成长。</p>
+
+      <!-- 切换标签 -->
+      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 border-b border-neutral-200 pb-4">
+        <a href="#" class="bg-primary-50 text-primary-600 border border-primary-200 rounded-md p-3 text-center text-sm font-medium">
+          今日榜单
+          <div class="text-xs text-neutral-500 mt-1">还剩 16 时 53 分 24 秒</div>
+        </a>
+        <a href="#" class="border border-neutral-200 hover:border-primary-200 hover:bg-primary-50 hover:text-primary-600 rounded-md p-3 text-center text-sm font-medium text-neutral-700">
+          本周榜单
+          <div class="text-xs text-neutral-500 mt-1">最后一天</div>
+        </a>
+        <a href="#" class="border border-neutral-200 hover:border-primary-200 hover:bg-primary-50 hover:text-primary-600 rounded-md p-3 text-center text-sm font-medium text-neutral-700">
+          5 月榜单
+          <div class="text-xs text-neutral-500 mt-1">还剩 13 天</div>
+        </a>
+        <a href="#" class="border border-neutral-200 hover:border-primary-200 hover:bg-primary-50 hover:text-primary-600 rounded-md p-3 text-center text-sm font-medium text-neutral-700">
+          第 2 季度
+          <div class="text-xs text-neutral-500 mt-1">还剩 43 天</div>
+        </a>
+        <a href="#" class="border border-neutral-200 hover:border-primary-200 hover:bg-primary-50 hover:text-primary-600 rounded-md p-3 text-center text-sm font-medium text-neutral-700">
+          2025 年度
+          <div class="text-xs text-neutral-500 mt-1">还剩 227 天</div>
+        </a>
+        <a href="#" class="border border-neutral-200 hover:border-primary-200 hover:bg-primary-50 hover:text-primary-600 rounded-md p-3 text-center text-sm font-medium text-neutral-700">
+          综合
+          <div class="text-xs text-neutral-500 mt-1">删一页</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- 用户列表 -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+      {users.map(user => <UserCard user={user} />)}
+    </div>
+
+    <!-- 分页 -->
+    <Pagination currentPage={1} totalPages={10} baseUrl="/users?"/>
+  </div>
+
+  <Footer slot="footer" />
+</MainLayout>

@@ -1,0 +1,102 @@
+---
+interface Props {
+  question: {
+    id: string;
+    title: string;
+    votes: number;
+    answers: number;
+    views: number;
+    tags: string[];
+    author: {
+      id: string;
+      name: string;
+      avatar?: string;
+    };
+    createdAt: string;
+  };
+}
+
+const { question } = Astro.props;
+---
+
+<div class="border-b border-neutral-200 py-3 md:py-4 px-2 md:px-0 hover:bg-neutral-50 transition-colors">
+  <div class="flex">
+    <!-- 投票信息 - 在移动端优化布局 -->
+    <div class="hidden sm:flex flex-col items-center mr-4 min-w-[50px]">
+      <div class="flex flex-col items-center mb-2">
+        <span class="text-neutral-500 text-sm">{question.votes}</span>
+        <span class="text-xs text-neutral-400">投票</span>
+      </div>
+      <div class="flex flex-col items-center mb-2">
+        <span class="text-neutral-500 text-sm">{question.answers}</span>
+        <span class="text-xs text-neutral-400">回答</span>
+      </div>
+      <div class="flex flex-col items-center">
+        <span class="text-neutral-500 text-sm">{question.views}</span>
+        <span class="text-xs text-neutral-400">浏览</span>
+      </div>
+    </div>
+
+    <!-- 移动端投票信息 - 水平布局 -->
+    <div class="sm:hidden flex flex-row items-center space-x-2 mr-3 text-xs text-neutral-500">
+      <div class="flex items-center">
+        <span class="font-medium">{question.votes}</span>
+        <span class="ml-1">票</span>
+      </div>
+      <div class="flex items-center">
+        <span class="font-medium">{question.answers}</span>
+        <span class="ml-1">答</span>
+      </div>
+      <div class="flex items-center">
+        <span class="font-medium">{question.views}</span>
+        <span class="ml-1">看</span>
+      </div>
+    </div>
+
+    <!-- 问题内容 -->
+    <div class="flex-1">
+      <h3 class="text-sm md:text-base font-medium mb-2 leading-tight">
+        <a href={`/q/${question.id}`} class="text-neutral-800 hover:text-primary-600">
+          {question.title}
+        </a>
+      </h3>
+
+      <!-- 标签 -->
+      <div class="flex flex-wrap gap-1 md:gap-2 mb-2">
+        {question.tags.map(tag => (
+          <a
+            href={`/t/${tag}`}
+            class="text-xs px-1.5 md:px-2 py-0.5 md:py-1 bg-neutral-100 text-neutral-600 hover:bg-primary-50 hover:text-primary-600 rounded-md truncate max-w-[120px]"
+          >
+            {tag}
+          </a>
+        ))}
+      </div>
+
+      <!-- 作者信息 -->
+      <div class="flex items-center text-xs md:text-sm text-neutral-500">
+        <a href={`/u/${question.author.id}`} class="flex items-center mr-2 md:mr-3 hover:text-primary-500 truncate max-w-[40%]">
+          {question.author.avatar ? (
+            <img src={question.author.avatar} alt={question.author.name} class="w-4 h-4 md:w-5 md:h-5 rounded-full mr-1" loading="lazy" />
+          ) : (
+            <div class="w-4 h-4 md:w-5 md:h-5 rounded-full bg-neutral-200 mr-1"></div>
+          )}
+          <span class="truncate">{question.author.name}</span>
+        </a>
+        <span class="truncate text-xs">{question.createdAt}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* 确保响应式布局下的标签不会太长 */
+  @media (max-width: 640px) {
+    a {
+      max-width: 100px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+</style>

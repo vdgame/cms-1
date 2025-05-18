@@ -1,0 +1,113 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+---
+
+<MainLayout title="登录">
+  <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+      <!-- Logo -->
+      <div class="text-center">
+        <a href="/" class="inline-block">
+          <svg class="h-12 text-primary-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 30">
+            <path d="M14 6.8v16.4c0 3.2 1.6 4.8 4.8 4.8h1.6v1.6H4.8v-1.6h1.6c3.2 0 4.8-1.6 4.8-4.8V6.8c0-3.2-1.6-4.8-4.8-4.8H4.8V0h16v1.6h-1.6c-3.2.4-5.2 2-5.2 5.2z" fill="currentColor"/>
+            <path d="M27.2 6.8v16.4c0 3.2 1.6 4.8 4.8 4.8h1.6v1.6H18v-1.6h1.6c3.2 0 4.8-1.6 4.8-4.8V6.8c0-3.2-1.6-4.8-4.8-4.8H18V0h16v1.6h-1.6c-3.6.4-5.2 2-5.2 5.2zM56.8 1.6c6 0 10.8 2.4 14 6.8 3.2 4 4.8 8.8 4.8 14.4v.8H46.4c.4 3.2 2 5.6 4.4 7.2 2.4 1.6 5.2 2.4 8.8 2.4 4 0 7.6-1.2 10.8-3.6l1.2 1.6c-1.6 1.2-3.6 2.4-6 3.2-2.4.8-4.8 1.2-7.6 1.2-6 0-10.8-1.6-14-5.2-3.2-3.2-5.2-7.6-5.2-12.8 0-3.6.8-6.8 2.4-9.6 1.6-2.8 3.6-4.8 6.4-6.4 2.8-1.2 6-2 9.2-2zm12.8 20c-.4-3.2-2-6-4.4-8-2.4-2-5.2-3.2-8.8-3.2-3.2 0-6.4 1.2-8.4 3.2-2.4 2-3.6 4.8-4 8h25.6zM109.6 10.8l1.2 1.6c-3.2 2.8-5.2 6.4-5.2 10.4 0 4 2 7.6 5.2 10.4l-1.2 1.6c-1.6-1.2-3.2-2.8-4.4-4.8-1.2-2-1.6-4.4-1.6-6.8 0-2.4.4-4.8 1.6-6.8 1.2-2.4 2.8-4 4.4-5.6zM98 0c1.6 0 3.2.4 4.4 1.2 1.2.8 2.4 2 3.2 3.2.8 1.6 1.2 3.2 1.2 4.8 0 2.8-1.2 5.2-3.2 7.2-2 2-4.4 2.8-7.2 2.8H90v6.4c0 3.2 1.6 4.8 4.8 4.8h1.6v1.6H80.8v-1.6h1.6c3.2 0 4.8-1.6 4.8-4.8V6.8c0-3.2-1.6-4.8-4.8-4.8h-1.6V0H98zm-8 17.6h5.6c2 0 3.6-.8 4.8-2 1.2-1.2 2-2.8 2-4.8s-.8-3.6-2-4.8c-1.2-1.2-2.8-2-4.8-2H90v13.6z" fill="#1890ff"/>
+          </svg>
+        </a>
+      </div>
+
+      <!-- 登录卡片 -->
+      <div class="bg-white py-8 px-4 shadow-md sm:rounded-lg sm:px-10 border border-neutral-200">
+        <h2 class="text-center text-2xl font-medium text-neutral-800 mb-6">注册登录</h2>
+
+        <!-- 手机号登录表单 -->
+        <form class="space-y-6">
+          <div>
+            <label for="phone" class="sr-only">手机号</label>
+            <input
+              id="phone"
+              name="phone"
+              type="tel"
+              required
+              class="appearance-none block w-full px-3 py-2 border border-neutral-300 rounded-md shadow-sm placeholder-neutral-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-base"
+              placeholder="手机号"
+            />
+          </div>
+
+          <div>
+            <div class="flex space-x-2">
+              <label for="code" class="sr-only">验证码</label>
+              <input
+                id="code"
+                name="code"
+                type="text"
+                required
+                class="appearance-none block w-full px-3 py-2 border border-neutral-300 rounded-md shadow-sm placeholder-neutral-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-base"
+                placeholder="短信验证码"
+              />
+              <button
+                type="button"
+                class="inline-flex justify-center py-2 px-4 border border-neutral-300 shadow-sm text-sm font-medium rounded-md text-neutral-700 bg-white hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+              >
+                获取验证码
+              </button>
+            </div>
+          </div>
+
+          <div class="text-sm text-neutral-500">
+            新手机号将自动注册
+          </div>
+
+          <div>
+            <button
+              type="submit"
+              class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+            >
+              登录
+            </button>
+          </div>
+        </form>
+
+        <!-- 其他登录方式 -->
+        <div class="mt-6">
+          <div class="flex justify-center space-x-6 mb-4">
+            <button class="text-neutral-600 hover:text-primary-500 text-sm font-medium">微信登录</button>
+            <button class="text-neutral-600 hover:text-primary-500 text-sm font-medium">免密码登录</button>
+            <button class="text-neutral-600 hover:text-primary-500 text-sm font-medium">密码登录</button>
+          </div>
+
+          <div class="flex justify-center space-x-4 mb-6">
+            <button class="text-primary-500 w-8 h-8 rounded-full flex items-center justify-center hover:bg-primary-50">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M8.707 7.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l2-2a1 1 0 00-1.414-1.414L11 7.586V3a1 1 0 10-2 0v4.586l-.293-.293z" />
+                <path d="M3 5a2 2 0 012-2h1a1 1 0 010 2H5v7h2l1 2h4l1-2h2V5h-1a1 1 0 110-2h1a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5z" />
+              </svg>
+            </button>
+            <button class="text-neutral-800 w-8 h-8 rounded-full flex items-center justify-center hover:bg-neutral-100">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 2a1 1 0 00-1 1v1a1 1 0 002 0V3a1 1 0 00-1-1zM4 4h3a3 3 0 006 0h3a2 2 0 012 2v9a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2zm2.5 7a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm2.45 4a2.5 2.5 0 10-4.9 0h4.9zM12 9a1 1 0 100 2h3a1 1 0 100-2h-3zm-1 4a1 1 0 011-1h2a1 1 0 110 2h-2a1 1 0 01-1-1z" clip-rule="evenodd" />
+              </svg>
+            </button>
+            <button class="text-red-500 w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-50">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+              </svg>
+            </button>
+            <button class="text-neutral-500 w-8 h-8 rounded-full flex items-center justify-center hover:bg-neutral-100">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <p class="text-center text-sm text-neutral-500">
+        继续即代表同意
+        <a href="/tos" class="font-medium text-primary-500 hover:text-primary-600">《服务协议》</a>
+        和
+        <a href="/privacy" class="font-medium text-primary-500 hover:text-primary-600">《隐私政策》</a>
+      </p>
+    </div>
+  </div>
+</MainLayout>

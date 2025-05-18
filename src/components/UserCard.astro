@@ -1,0 +1,65 @@
+---
+interface Props {
+  user: {
+    id: string;
+    name: string;
+    avatar?: string;
+    reputation: number;
+    tags?: {
+      name: string;
+      id: string;
+    }[];
+    bio?: string;
+  };
+}
+
+const { user } = Astro.props;
+---
+
+<div class="bg-white border border-neutral-200 rounded-md p-4 h-full">
+  <div class="flex flex-col items-center text-center">
+    <a href={`/u/${user.id}`} class="mb-3">
+      {user.avatar ? (
+        <img src={user.avatar} alt={user.name} class="w-16 h-16 rounded-full" />
+      ) : (
+        <div class="w-16 h-16 rounded-full bg-neutral-200 flex items-center justify-center text-neutral-500">
+          <span>{user.name.charAt(0).toUpperCase()}</span>
+        </div>
+      )}
+    </a>
+
+    <a href={`/u/${user.id}`} class="text-base font-medium text-neutral-800 hover:text-primary-600 mb-1">
+      {user.name}
+    </a>
+
+    <div class="text-sm text-primary-500 mb-3">
+      {user.reputation > 0 ? `+${user.reputation}` : user.reputation}
+    </div>
+
+    {user.bio && (
+      <p class="text-sm text-neutral-600 mb-4 line-clamp-2">
+        {user.bio}
+      </p>
+    )}
+
+    {user.tags && user.tags.length > 0 && (
+      <div class="flex flex-wrap justify-center gap-2 w-full">
+        {user.tags.slice(0, 3).map(tag => (
+          <a
+            href={`/t/${tag.id}`}
+            class="text-xs px-2 py-1 bg-neutral-100 text-neutral-600 hover:bg-primary-50 hover:text-primary-600 rounded-md"
+          >
+            {tag.name}
+          </a>
+        ))}
+      </div>
+    )}
+
+    <a
+      href={`/u/${user.id}`}
+      class="mt-4 text-center text-sm text-primary-500 border border-primary-500 rounded-md py-1 px-4 hover:bg-primary-50 transition w-full"
+    >
+      查看主页
+    </a>
+  </div>
+</div>

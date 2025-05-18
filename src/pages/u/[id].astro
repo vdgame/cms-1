@@ -1,0 +1,299 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import QuestionCard from '../../components/QuestionCard.astro';
+import Pagination from '../../components/Pagination.astro';
+import { formatDate, formatNumber, getUserAvatar } from '../../utils/format';
+import { users, questions, answers } from '../../data/mockData';
+
+// Generate static paths for each user
+export function getStaticPaths() {
+  return users.map(user => {
+    // Get user's questions
+    const userQuestions = questions.filter(q => q.author.id === user.id)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    // Get user's answers
+    const userAnswers = answers.filter(a => a.author.id === user.id)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    return {
+      params: { id: user.id },
+      props: { user, questions: userQuestions, answers: userAnswers }
+    };
+  });
+}
+
+// Get props from getStaticPaths
+const { id } = Astro.params;
+const { user, questions, answers } = Astro.props;
+
+// 活跃度数据 - 模拟过去12个月的活动
+const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const currentMonth = new Date().getMonth();
+const activityData = Array.from({ length: 12 }, (_, i) => {
+  const month = (currentMonth - i + 12) % 12;
+  return {
+    month: months[month],
+    activities: Math.floor(Math.random() * 15)
+  };
+}).reverse();
+
+// 当前标签页
+const activeTab = Astro.url.searchParams.get('tab') || 'profile';
+---
+
+<MainLayout title={user ? `${user.name}的个人主页` : '用户不存在'}>
+  <Header slot="header" />
+
+  {!user ? (
+    <div class="text-center py-12">
+      <h1 class="text-2xl font-bold text-neutral-700 mb-4">找不到该用户</h1>
+      <p class="text-neutral-500 mb-6">抱歉，您查找的用户不存在或已被删除</p>
+      <a href="/" class="bg-primary-500 text-white px-4 py-2 rounded-md hover:bg-primary-600 transition">返回首页</a>
+    </div>
+  ) : (
+    <div class="mx-auto">
+      <!-- 用户基本信息 -->
+      <div class="bg-white rounded-md border border-neutral-200 p-6 mb-6">
+        <div class="flex flex-col md:flex-row items-center md:items-start">
+          <div class="w-24 h-24 md:w-32 md:h-32 mb-4 md:mb-0 md:mr-8">
+            <img
+              src={getUserAvatar(user.avatar, user.name)}
+              alt={user.name}
+              class="w-full h-full object-cover rounded-full border-4 border-neutral-100"
+            />
+          </div>
+
+          <div class="flex-1 text-center md:text-left">
+            <h1 class="text-2xl md:text-3xl font-bold text-neutral-800 mb-2">{user.name}</h1>
+
+            <div class="text-primary-500 font-medium text-lg mb-4">
+              {user.reputation > 0 ? `+${user.reputation}` : user.reputation}
+            </div>
+
+            {user.bio && (
+              <p class="text-neutral-600 mb-4 max-w-2xl">{user.bio}</p>
+            )}
+
+            <div class="flex flex-wrap justify-center md:justify-start gap-2 mb-4">
+              {user.tags?.map((tag: any) => (
+                <a
+                  href={`/t/${tag.id}`}
+                  class="text-xs px-2 py-1 bg-neutral-100 text-neutral-600 hover:bg-primary-50 hover:text-primary-600 rounded-md"
+                >
+                  {tag.name}
+                </a>
+              ))}
+            </div>
+
+            <div class="text-sm text-neutral-500">注册于 {formatDate(user.createdAt)}</div>
+          </div>
+
+          <div class="hidden md:flex md:flex-col items-end gap-3 mt-2">
+            <button class="bg-primary-500 text-white px-4 py-2 rounded-md hover:bg-primary-600 transition">
+              关注
+            </button>
+            <button class="border border-neutral-300 text-neutral-700 px-4 py-2 rounded-md hover:bg-neutral-50 transition">
+              私信
+            </button>
+          </div>
+        </div>
+
+        <!-- 移动端按钮 -->
+        <div class="flex justify-center gap-4 mt-6 md:hidden">
+          <button class="bg-primary-500 text-white px-4 py-2 rounded-md hover:bg-primary-600 transition flex-1">
+            关注
+          </button>
+          <button class="border border-neutral-300 text-neutral-700 px-4 py-2 rounded-md hover:bg-neutral-50 transition flex-1">
+            私信
+          </button>
+        </div>
+      </div>
+
+      <!-- 用户统计信息 -->
+      <div class="bg-white rounded-md border border-neutral-200 p-6 mb-6">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="text-center p-4 border-r border-neutral-200">
+            <div class="text-2xl font-bold text-neutral-800">{formatNumber(user.stats.questions)}</div>
+            <div class="text-neutral-500">问题</div>
+          </div>
+          <div class="text-center p-4 border-r border-neutral-200">
+            <div class="text-2xl font-bold text-neutral-800">{formatNumber(user.stats.answers)}</div>
+            <div class="text-neutral-500">回答</div>
+          </div>
+          <div class="text-center p-4 border-r border-neutral-200">
+            <div class="text-2xl font-bold text-primary-500">{formatNumber(user.reputation)}</div>
+            <div class="text-neutral-500">声望</div>
+          </div>
+          <div class="text-center p-4">
+            <div class="text-2xl font-bold text-neutral-800">{formatNumber(user.stats.followers)}</div>
+            <div class="text-neutral-500">关注者</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 内容标签页 -->
+      <div class="bg-white rounded-md border border-neutral-200 mb-6">
+        <div class="flex border-b border-neutral-200 text-sm overflow-x-auto">
+          <a href={`/u/${id}`} class={`px-4 py-3 whitespace-nowrap ${activeTab === 'profile' ? 'text-primary-500 border-b-2 border-primary-500 font-medium' : 'text-neutral-600 hover:text-primary-500'}`}>
+            个人资料
+          </a>
+          <a href={`/u/${id}?tab=questions`} class={`px-4 py-3 whitespace-nowrap ${activeTab === 'questions' ? 'text-primary-500 border-b-2 border-primary-500 font-medium' : 'text-neutral-600 hover:text-primary-500'}`}>
+            问题 ({questions.length})
+          </a>
+          <a href={`/u/${id}?tab=answers`} class={`px-4 py-3 whitespace-nowrap ${activeTab === 'answers' ? 'text-primary-500 border-b-2 border-primary-500 font-medium' : 'text-neutral-600 hover:text-primary-500'}`}>
+            回答 ({answers.length})
+          </a>
+          <a href={`/u/${id}?tab=activities`} class={`px-4 py-3 whitespace-nowrap ${activeTab === 'activities' ? 'text-primary-500 border-b-2 border-primary-500 font-medium' : 'text-neutral-600 hover:text-primary-500'}`}>
+            动态
+          </a>
+          <a href={`/u/${id}?tab=following`} class={`px-4 py-3 whitespace-nowrap ${activeTab === 'following' ? 'text-primary-500 border-b-2 border-primary-500 font-medium' : 'text-neutral-600 hover:text-primary-500'}`}>
+            关注
+          </a>
+        </div>
+
+        <div class="p-6">
+          {activeTab === 'profile' && (
+            <div>
+              <h2 class="text-lg font-medium text-neutral-800 mb-4">活跃度</h2>
+              <div class="bg-neutral-50 p-4 rounded-md mb-6">
+                <div class="flex items-end h-40 gap-1">
+                  {activityData.map((data) => (
+                    <div class="flex-1 flex flex-col items-center">
+                      <div class="w-full bg-primary-100 hover:bg-primary-200 transition" style={`height: ${data.activities * 8}px`}></div>
+                      <div class="text-xs text-neutral-500 mt-2">{data.month}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <h2 class="text-lg font-medium text-neutral-800 mb-4">关于</h2>
+              <div class="bg-neutral-50 p-4 rounded-md mb-6">
+                <p class="text-neutral-700">{user.bio || '用户未提供个人介绍'}</p>
+              </div>
+
+              <h2 class="text-lg font-medium text-neutral-800 mb-4">擅长技能</h2>
+              <div class="bg-neutral-50 p-4 rounded-md">
+                <div class="flex flex-wrap gap-2">
+                  {user.tags?.map((tag: any) => (
+                    <a
+                      href={`/t/${tag.id}`}
+                      class="px-3 py-1.5 bg-white border border-neutral-200 text-neutral-700 hover:bg-primary-50 hover:border-primary-200 hover:text-primary-600 rounded-md transition"
+                    >
+                      {tag.name}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'questions' && (
+            <div>
+              {questions.length === 0 ? (
+                <div class="text-center py-12">
+                  <p class="text-neutral-500">用户暂未提问任何问题</p>
+                </div>
+              ) : (
+                <div>
+                  {questions.map((question: any) => (
+                    <QuestionCard question={question} />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'answers' && (
+            <div>
+              {answers.length === 0 ? (
+                <div class="text-center py-12">
+                  <p class="text-neutral-500">用户暂未回答任何问题</p>
+                </div>
+              ) : (
+                <div class="space-y-6">
+                  {answers.map((answer: any) => (
+                    <div class="border-b border-neutral-200 pb-4 mb-4 last:border-0">
+                      <h3 class="text-base font-medium mb-2">
+                        <a href={`/q/${answer.questionId}`} class="text-neutral-800 hover:text-primary-600">
+                          {/* 通过questionId查找对应问题标题 */}
+                          {questions.find((q: any) => q.id === answer.questionId)?.title || '问题标题'}
+                        </a>
+                      </h3>
+                      <div class="text-sm text-neutral-600 mb-2 line-clamp-2">{answer.content.replace(/<[^>]+>/g, '').substring(0, 200)}...</div>
+                      <div class="flex items-center text-xs text-neutral-500">
+                        <span class="mr-3">
+                          <span class="text-primary-500 font-medium">{answer.votes}</span> 投票
+                        </span>
+                        <span>{formatDate(answer.createdAt)}</span>
+                        {answer.isAccepted && (
+                          <span class="ml-3 text-green-500">✓ 已采纳</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'activities' && (
+            <div>
+              {user.activities?.length === 0 ? (
+                <div class="text-center py-12">
+                  <p class="text-neutral-500">用户暂无活动记录</p>
+                </div>
+              ) : (
+                <div class="relative">
+                  {/* 时间线 */}
+                  <div class="absolute left-2.5 top-0 bottom-0 w-0.5 bg-neutral-200"></div>
+
+                  <div class="space-y-6 ml-10">
+                    {user.activities?.map((activity: any) => (
+                      <div class="relative">
+                        {/* 时间点 */}
+                        <div class="absolute -left-10 mt-1 w-5 h-5 rounded-full bg-white border-2 border-primary-500"></div>
+
+                        <div>
+                          <div class="text-sm">
+                            {activity.type === 'question' ? (
+                              <span>提出了问题 <a href={`/q/${activity.id}`} class="text-primary-500 hover:underline">{activity.title}</a></span>
+                            ) : activity.type === 'answer' ? (
+                              <span>回答了问题 <a href={`/q/${activity.questionId}`} class="text-primary-500 hover:underline">{activity.questionTitle}</a></span>
+                            ) : (
+                              <span>{activity.content}</span>
+                            )}
+                          </div>
+                          <div class="text-xs text-neutral-500 mt-1">{formatDate(activity.date)}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'following' && (
+            <div class="text-center py-12">
+              <p class="text-neutral-500">关注列表功能即将上线，敬请期待</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )}
+
+  <Footer slot="footer" />
+</MainLayout>
+
+<style>
+  /* 活跃度图表样式 */
+  .activity-chart {
+    display: flex;
+    align-items: flex-end;
+    height: 160px;
+  }
+</style>

@@ -1,0 +1,212 @@
+<!-- 搜索栏组件 -->
+
+<div class="search-container w-full">
+  <form class="relative" action="/search" method="get">
+    <div class="relative">
+      <input
+        id="search-input"
+        name="q"
+        type="text"
+        placeholder="搜索关键字"
+        class="w-full py-2 pl-10 pr-4 rounded-md border border-neutral-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+        autocomplete="off"
+      />
+      <svg
+        class="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 pointer-events-none"
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+      <button
+        type="submit"
+        class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-primary-500 text-white p-1 rounded hidden md:block"
+        aria-label="搜索"
+      >
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z"
+            stroke="white"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
+    </div>
+    <!-- 搜索类型选择 - 小屏幕隐藏 -->
+    <div class="hidden md:flex absolute top-full left-0 mt-1 bg-white border border-neutral-200 rounded-md shadow-md z-10 w-full" id="search-filters">
+      <div class="flex items-center justify-between w-full px-2 py-1 text-xs">
+        <div class="flex items-center space-x-2">
+          <label class="flex items-center">
+            <input type="radio" name="type" value="all" checked class="mr-1">
+            <span>全部</span>
+          </label>
+          <label class="flex items-center">
+            <input type="radio" name="type" value="tag" class="mr-1">
+            <span>标签</span>
+          </label>
+          <label class="flex items-center">
+            <input type="radio" name="type" value="content" class="mr-1">
+            <span>内容</span>
+          </label>
+          <label class="flex items-center">
+            <input type="radio" name="type" value="author" class="mr-1">
+            <span>作者</span>
+          </label>
+        </div>
+      </div>
+    </div>
+    <!-- 搜索建议下拉框 -->
+    <div id="search-suggestions" class="absolute left-0 right-0 top-full mt-1 bg-white border border-neutral-200 rounded-md shadow-md z-10 hidden md:max-w-lg w-full">
+      <div class="p-2 border-b border-neutral-100">
+        <div class="text-sm text-neutral-500">热门搜索</div>
+        <div class="mt-1 flex flex-wrap gap-2">
+          <a href="/search?q=javascript&type=tag" class="text-xs bg-neutral-100 text-neutral-700 px-2 py-1 rounded hover:bg-primary-50 hover:text-primary-600">JavaScript</a>
+          <a href="/search?q=react&type=tag" class="text-xs bg-neutral-100 text-neutral-700 px-2 py-1 rounded hover:bg-primary-50 hover:text-primary-600">React</a>
+          <a href="/search?q=vue&type=tag" class="text-xs bg-neutral-100 text-neutral-700 px-2 py-1 rounded hover:bg-primary-50 hover:text-primary-600">Vue</a>
+          <a href="/search?q=typescript&type=tag" class="text-xs bg-neutral-100 text-neutral-700 px-2 py-1 rounded hover:bg-primary-50 hover:text-primary-600">TypeScript</a>
+        </div>
+      </div>
+      <div class="py-1" role="none">
+        <a href="/search?q=javascript基础教程&type=content" class="text-neutral-700 hover:bg-neutral-50 hover:text-primary-600 block px-4 py-2 text-sm">JavaScript 基础教程</a>
+        <a href="/search?q=react最佳实践&type=content" class="text-neutral-700 hover:bg-neutral-50 hover:text-primary-600 block px-4 py-2 text-sm">React 最佳实践</a>
+        <a href="/search?q=如何优化nodejs性能&type=content" class="text-neutral-700 hover:bg-neutral-50 hover:text-primary-600 block px-4 py-2 text-sm">如何优化 Node.js 性能</a>
+        <a href="/search?q=typescript高级技巧&type=content" class="text-neutral-700 hover:bg-neutral-50 hover:text-primary-600 block px-4 py-2 text-sm">TypeScript 高级技巧</a>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('search-input');
+    const searchSuggestions = document.getElementById('search-suggestions');
+    const searchFilters = document.getElementById('search-filters');
+
+    // 显示搜索建议
+    searchInput?.addEventListener('focus', () => {
+      searchSuggestions?.classList.remove('hidden');
+      searchFilters?.classList.remove('hidden');
+    });
+
+    // 失去焦点时隐藏搜索建议（延时以允许点击建议项）
+    searchInput?.addEventListener('blur', () => {
+      setTimeout(() => {
+        searchSuggestions?.classList.add('hidden');
+
+        // 在移动设备上也隐藏过滤器
+        if (window.innerWidth >= 768) {
+          searchFilters?.classList.add('hidden');
+        }
+      }, 200);
+    });
+
+    // 移动端：输入时显示建议
+    searchInput?.addEventListener('input', () => {
+      if (searchInput.value.trim().length > 0) {
+        searchSuggestions?.classList.remove('hidden');
+      } else {
+        searchSuggestions?.classList.add('hidden');
+      }
+    });
+
+    // 点击建议项时自动填充并搜索
+    searchSuggestions?.addEventListener('mousedown', (e) => {
+      const target = e.target.closest('a');
+      if (target && target.getAttribute('href')) {
+        e.preventDefault();
+        const url = new URL(target.getAttribute('href'), window.location.origin);
+        const query = url.searchParams.get('q');
+        if (query) {
+          searchInput.value = query;
+        }
+        window.location.href = target.getAttribute('href');
+      }
+    });
+
+    // 简单的搜索处理
+    const searchForm = searchInput?.closest('form');
+    searchForm?.addEventListener('submit', (e) => {
+      const query = searchInput.value.trim();
+      if (!query) {
+        e.preventDefault();
+      }
+    });
+
+    // 显示搜索类型选择
+    searchInput?.addEventListener('focus', () => {
+      searchFilters?.classList.remove('hidden');
+    });
+
+    // 响应式：点击页面其他地方时隐藏建议
+    document.addEventListener('click', (e) => {
+      if (!searchForm?.contains(e.target)) {
+        searchSuggestions?.classList.add('hidden');
+        searchFilters?.classList.add('hidden');
+      }
+    });
+
+    // 检查URL参数并自动设置搜索类型
+    const setSearchTypeFromUrl = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const type = urlParams.get('type');
+      if (type) {
+        const radioBtn = document.querySelector(`input[name="type"][value="${type}"]`);
+        if (radioBtn) {
+          radioBtn.checked = true;
+        }
+      }
+    };
+
+    setSearchTypeFromUrl();
+
+    // 预填充搜索框
+    if (window.location.pathname === '/search') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const query = urlParams.get('q');
+      if (query && searchInput) {
+        searchInput.value = query;
+      }
+    }
+  });
+</script>
+
+<style>
+/* 响应式样式增强 */
+.search-container {
+  max-width: 100%;
+}
+@media (max-width: 640px) {
+  .search-container form {
+    padding: 0 0.5rem;
+  }
+  #search-suggestions {
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100vw !important;
+  }
+  .search-container input {
+    font-size: 1rem;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+}
+</style>

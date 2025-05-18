@@ -1,0 +1,476 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import { questionService, answerService, interactionService } from '../../services';
+
+// 获取问题ID
+const { id } = Astro.params;
+
+// 如果没有ID，重定向到首页
+if (!id) {
+  return Astro.redirect('/');
+}
+
+// 从数据库获取问题和回答
+const question = await questionService.getQuestionById(id);
+const answers = await answerService.getAnswersByQuestionId(id);
+
+// 如果问题不存在，返回404
+if (!question) {
+  return Astro.redirect('/404');
+}
+
+// 用户ID (在实际应用中应该从认证系统获取)
+const userId = 'meathill';
+
+// 获取用户互动状态
+const questionInteractions = await interactionService.getUserInteractions(userId, 'question', id);
+---
+
+<MainLayout title={question.title}>
+  <div class="container mx-auto px-4 py-8">
+    <!-- 问题详情 -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+      <div class="flex flex-col md:flex-row">
+        <!-- 投票区域 -->
+        <div class="flex flex-col items-center mr-4 md:w-16">
+          <button
+            class={`vote-btn upvote ${questionInteractions.voted === 1 ? 'text-blue-500' : 'text-gray-400'} hover:text-blue-500`}
+            data-id={question.id}
+            data-type="question"
+            data-value="1"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8">
+              <path d="M12 4L4 15h16L12 4z" />
+            </svg>
+          </button>
+          <span class="text-xl font-bold my-2 vote-count">{question.votes}</span>
+          <button
+            class={`vote-btn downvote ${questionInteractions.voted === -1 ? 'text-red-500' : 'text-gray-400'} hover:text-red-500`}
+            data-id={question.id}
+            data-type="question"
+            data-value="-1"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8">
+              <path d="M12 20L4 9h16L12 20z" />
+            </svg>
+          </button>
+          <button
+            class={`bookmark-btn mt-4 ${questionInteractions.bookmarked ? 'text-yellow-500' : 'text-gray-400'} hover:text-yellow-500`}
+            data-id={question.id}
+            title="收藏问题"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
+              <path d="M5 3h14a2 2 0 012 2v16l-7-5-7 5V5a2 2 0 012-2z" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- 问题内容 -->
+        <div class="flex-1">
+          <h1 class="text-2xl font-bold mb-4">{question.title}</h1>
+          <div class="flex items-center text-sm text-gray-500 mb-4">
+            <span class="mr-4">提问于 {new Date(question.createdAt).toLocaleString('zh-CN')}</span>
+            <span class="mr-4">浏览 {question.views} 次</span>
+          </div>
+          <div class="prose max-w-none mb-4 question-content">
+            {question.content.split('\n').map(paragraph => (
+              <p>{paragraph}</p>
+            ))}
+          </div>
+          <div class="flex flex-wrap mt-4">
+            {question.tags.map((tag: string) => (
+              <a href={`/t/${tag}`} class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-sm mr-2 mb-2 hover:bg-blue-200">
+                {tag}
+              </a>
+            ))}
+          </div>
+          <div class="flex justify-between items-center mt-6 pt-4 border-t">
+            <div class="flex items-center">
+              <img src={question.author.avatar} alt={question.author.name} class="w-8 h-8 rounded-full mr-2" />
+              <a href={`/u/${question.author.id}`} class="text-blue-600 hover:text-blue-800">{question.author.name}</a>
+            </div>
+            <div class="flex space-x-2">
+              <button
+                class="share-btn p-2 text-gray-500 hover:bg-gray-100 rounded-full"
+                data-id={question.id}
+                data-title={question.title}
+                title="分享"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                  <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M7 6v1a4 4 0 004 4h2a4 4 0 004-4V6M12 2v9"></path>
+                </svg>
+              </button>
+              <button
+                class="report-btn p-2 text-gray-500 hover:bg-gray-100 rounded-full"
+                data-id={question.id}
+                data-type="question"
+                title="举报"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 16a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm1-5a1 1 0 01-2 0V7a1 1 0 012 0v6z"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 回答数量 -->
+    <h2 class="text-xl font-bold mb-4">{answers.length} 个回答</h2>
+
+    <!-- 回答列表 -->
+    {answers.map(answer => {
+      const isAccepted = answer.isAccepted === 1;
+      return (
+        <div class={`bg-white rounded-lg shadow-md p-6 mb-6 ${isAccepted ? 'border-2 border-green-500' : ''}`}>
+          <div class="flex flex-col md:flex-row">
+            <!-- 投票区域 -->
+            <div class="flex flex-col items-center mr-4 md:w-16">
+              <button
+                class="vote-btn upvote text-gray-400 hover:text-blue-500"
+                data-id={answer.id}
+                data-type="answer"
+                data-value="1"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8">
+                  <path d="M12 4L4 15h16L12 4z" />
+                </svg>
+              </button>
+              <span class="text-xl font-bold my-2 vote-count">{answer.votes}</span>
+              <button
+                class="vote-btn downvote text-gray-400 hover:text-red-500"
+                data-id={answer.id}
+                data-type="answer"
+                data-value="-1"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8">
+                  <path d="M12 20L4 9h16L12 20z" />
+                </svg>
+              </button>
+              {isAccepted && (
+                <div class="mt-4 text-green-500" title="已采纳">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                  </svg>
+                </div>
+              )}
+            </div>
+
+            <!-- 回答内容 -->
+            <div class="flex-1">
+              <div class="prose max-w-none mb-4 answer-content">
+                {answer.content.split('\n').map(paragraph => (
+                  <p>{paragraph}</p>
+                ))}
+              </div>
+              <div class="flex justify-between items-center mt-6 pt-4 border-t">
+                <div class="flex items-center">
+                  <img src={answer.author.avatar} alt={answer.author.name} class="w-8 h-8 rounded-full mr-2" />
+                  <a href={`/u/${answer.author.id}`} class="text-blue-600 hover:text-blue-800">{answer.author.name}</a>
+                </div>
+                <div class="flex space-x-2">
+                  <span class="text-sm text-gray-500">回答于 {new Date(answer.createdAt).toLocaleString('zh-CN')}</span>
+                  <button
+                    class="report-btn p-2 text-gray-500 hover:bg-gray-100 rounded-full"
+                    data-id={answer.id}
+                    data-type="answer"
+                    title="举报"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 16a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm1-5a1 1 0 01-2 0V7a1 1 0 012 0v6z"></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    })}
+  </div>
+
+  <!-- 举报对话框 -->
+  <div id="reportModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-8 max-w-md mx-auto">
+      <h2 class="text-xl font-bold mb-4">举报内容</h2>
+      <input type="hidden" id="reportItemId">
+      <input type="hidden" id="reportItemType">
+      <div class="mb-4">
+        <label class="block text-gray-700 mb-2">举报原因</label>
+        <select id="reportReason" class="w-full border rounded px-3 py-2">
+          <option value="">请选择举报原因...</option>
+          <option value="spam">垃圾信息</option>
+          <option value="offensive">冒犯性内容</option>
+          <option value="inappropriate">不当内容</option>
+          <option value="copyright">版权问题</option>
+          <option value="other">其他原因</option>
+        </select>
+      </div>
+      <div class="mb-4">
+        <label class="block text-gray-700 mb-2">详细描述（可选）</label>
+        <textarea id="reportDescription" class="w-full border rounded px-3 py-2" rows="3"></textarea>
+      </div>
+      <div class="flex justify-end">
+        <button id="cancelReport" class="px-4 py-2 bg-gray-200 text-gray-800 rounded mr-2">取消</button>
+        <button id="submitReport" class="px-4 py-2 bg-red-500 text-white rounded disabled:bg-red-300" disabled>提交</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 分享对话框 -->
+  <div id="shareModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-8 max-w-md mx-auto">
+      <h2 class="text-xl font-bold mb-4">分享这个问题</h2>
+      <input type="hidden" id="shareItemId">
+      <div class="mb-4">
+        <label class="block text-gray-700 mb-2">链接</label>
+        <div class="flex">
+          <input id="shareLink" type="text" class="flex-1 border rounded-l px-3 py-2" readonly>
+          <button id="copyShareLink" class="bg-blue-500 text-white px-4 py-2 rounded-r">复制</button>
+        </div>
+      </div>
+      <div class="mb-4">
+        <label class="block text-gray-700 mb-2">分享到</label>
+        <div class="flex space-x-4">
+          <a href="#" id="shareWeibo" class="p-2 bg-red-500 text-white rounded" target="_blank">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M9.82727273,18.9618182 C13.1545455,18.9618182 15.8663636,17.1513636 15.8663636,14.8886364 C15.8663636,12.6259091 13.1545455,10.8154545 9.82727273,10.8154545 C6.5,10.8154545 3.78818182,12.6259091 3.78818182,14.8886364 C3.78818182,17.1513636 6.5,18.9618182 9.82727273,18.9618182 L9.82727273,18.9618182 Z M7.08636364,16.0977273 C6.79090909,16.0977273 6.54772727,15.8545455 6.54772727,15.5590909 C6.54772727,15.2636364 6.79090909,15.0204545 7.08636364,15.0204545 C7.38181818,15.0204545 7.625,15.2636364 7.625,15.5590909 C7.625,15.8545455 7.38181818,16.0977273 7.08636364,16.0977273 L7.08636364,16.0977273 Z M10.0681818,16.0977273 C10.3636364,15.6068182 10.2045455,14.9431818 9.71363636,14.6477273 C9.22272727,14.3522727 8.55909091,14.5113636 8.26363636,15.0022727 C7.96818182,15.4931818 8.12727273,16.1568182 8.61818182,16.4522727 C9.10909091,16.7477273 9.77272727,16.5886364 10.0681818,16.0977273 L10.0681818,16.0977273 Z M17.2863636,15.7954545 C17.4454545,15.3045455 17.1272727,14.7613636 16.6136364,14.6023.2Ð</path>
+            </svg>
+          </a>
+          <a href="#" id="shareWechat" class="p-2 bg-green-500 text-white rounded">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M8.38181818,10.6590909 C8.38181818,10.0159091 8.90909091,9.48863636 9.55227273,9.48863636 C10.1954545,9.48863636 10.7227273,10.0159091 10.7227273,10.6590909 C10.7227273,11.3022727 10.1954545,11.8295455 9.55227273,11.8295455 C8.90909091,11.8295455 8.38181818,11.3022727 8.38181818,10.6590909 L8.38181818,10.6590909 Z M13.2772727,10.6590909 C13.2772727,10.0159091 13.8045455,9.48863636 14.4477273,9.48863636 C15.0909091,9.48863636 15.6181818,10.0159091 15.6181818,10.6590909 C15.6181818,11.3022727 15.0909091,11.8295455 14.4477273,11.8295455 C13.8045455,11.8295455 13.2772727,11.3022727 13.2772727,10.6590909 L13.2772727,10.6590909 Z M18.4090909,17.5 C18.4090909,18.4590909 17.6409091,19.2272727 16.6818182,19.2272727 L7.31818182,19.2272727 C6.35909091,19.2272727 5.59090909,18.4590909 5.59090909,17.5 L5.59090909,6.5 C5.59090909,5.54090909 6.35909091,4.77272727 7.31818182,4.77272727 L16.6818182,4.77272727 C17.6409091,4.77272727 18.4090909,5.54090909 18.4090909,6.5 L18.4090909,17.5 L18.4090909,17.5 Z"></path>
+            </svg>
+          </a>
+          <a href="#" id="shareTwitter" class="p-2 bg-blue-400 text-white rounded" target="_blank">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M22.92,6.00136 C22.1483,6.35283 21.3166,6.58532 20.4408,6.68703 C21.3366,6.15707 22.0175,5.31262 22.3386,4.29746 C21.5049,4.79651 20.5812,5.16741 19.5873,5.37798 C18.7832,4.54146 17.6422,4.02551 16.3808,4.02551 C13.9615,4.02551 11.9968,5.99018 11.9968,8.40314 C11.9968,8.77257 12.0344,9.13077 12.1089,9.47365 C8.36377,9.29378 5.07685,7.56031 2.85312,4.83599 C2.45398,5.52943 2.22764,6.33747 2.22764,7.19609 C2.22764,8.82656 3.09338,10.2693 4.39698,11.1319 C3.68672,11.1108 3.02051,10.9126 2.43781,10.5873 L2.43781,10.6431 C2.43781,12.7453 3.95908,14.4908 5.96148,14.9225 C5.57361,15.0264 5.16095,15.0825 4.73465,15.0825 C4.43506,15.0825 4.14392,15.0566 3.86003,15.0055 C4.44983,16.7183 6.04368,17.9606 7.92845,17.9968 C6.45582,19.1443 4.59655,19.8206 2.56408,19.8206 C2.19348,19.8206 1.82747,19.8021 1.46875,19.766 C3.37348,20.9749 5.65975,21.6771 8.10862,21.6771 C16.3696,21.6771 20.868,15.154 20.868,9.47365 L20.8533,8.90424 C21.6958,8.3081 22.3408,7.55994 22.8462,6.70518 L22.92,6.00136 Z"></path>
+            </svg>
+          </a>
+        </div>
+      </div>
+      <div class="flex justify-end">
+        <button id="closeShare" class="px-4 py-2 bg-gray-200 text-gray-800 rounded">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 通知信息 -->
+  <div id="notification" class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg hidden">
+    操作成功
+  </div>
+</MainLayout>
+
+<script>
+  // 使用服务器API替代localStorage
+  import { api } from '../../utils/api';
+
+  // 投票功能
+  const handleVote = async (e) => {
+    const target = e.currentTarget;
+    const id = target.dataset.id;
+    const type = target.dataset.type;
+    const value = parseInt(target.dataset.value);
+
+    try {
+      const response = await api.interactions.vote(type, id, value);
+
+      // 更新UI
+      const voteCount = target.parentElement.querySelector('.vote-count');
+      if (response.status === 'removed') {
+        target.classList.remove('text-blue-500', 'text-red-500');
+        target.classList.add('text-gray-400');
+        voteCount.textContent = parseInt(voteCount.textContent) - value;
+      } else if (response.status === 'updated') {
+        // 移除所有颜色
+        target.parentElement.querySelector('.upvote').classList.remove('text-blue-500');
+        target.parentElement.querySelector('.downvote').classList.remove('text-red-500');
+
+        // 添加新颜色
+        if (value === 1) {
+          target.classList.add('text-blue-500');
+        } else {
+          target.classList.add('text-red-500');
+        }
+
+        // 更新计数
+        voteCount.textContent = parseInt(voteCount.textContent) + (value * 2);
+      } else {
+        if (value === 1) {
+          target.classList.remove('text-gray-400');
+          target.classList.add('text-blue-500');
+        } else {
+          target.classList.remove('text-gray-400');
+          target.classList.add('text-red-500');
+        }
+        voteCount.textContent = parseInt(voteCount.textContent) + value;
+      }
+    } catch (error) {
+      console.error('Vote error:', error);
+      showNotification('投票失败，请稍后重试', 'error');
+    }
+  };
+
+  // 收藏功能
+  const handleBookmark = async (e) => {
+    const target = e.currentTarget;
+    const id = target.dataset.id;
+
+    try {
+      const response = await api.interactions.bookmark(id);
+
+      if (response.status === 'added') {
+        target.classList.remove('text-gray-400');
+        target.classList.add('text-yellow-500');
+        showNotification('问题已收藏');
+      } else {
+        target.classList.remove('text-yellow-500');
+        target.classList.add('text-gray-400');
+        showNotification('已取消收藏');
+      }
+    } catch (error) {
+      console.error('Bookmark error:', error);
+      showNotification('操作失败，请稍后重试', 'error');
+    }
+  };
+
+  // 举报功能
+  const reportModal = document.getElementById('reportModal');
+  const reportItemId = document.getElementById('reportItemId');
+  const reportItemType = document.getElementById('reportItemType');
+  const reportReason = document.getElementById('reportReason');
+  const reportDescription = document.getElementById('reportDescription');
+  const submitReport = document.getElementById('submitReport');
+  const cancelReport = document.getElementById('cancelReport');
+
+  const openReportModal = (e) => {
+    const target = e.currentTarget;
+    reportItemId.value = target.dataset.id;
+    reportItemType.value = target.dataset.type;
+    reportModal.classList.remove('hidden');
+    reportModal.classList.add('flex');
+  };
+
+  const closeReportModal = () => {
+    reportModal.classList.remove('flex');
+    reportModal.classList.add('hidden');
+    reportReason.value = '';
+    reportDescription.value = '';
+  };
+
+  const handleReportSubmit = async () => {
+    if (!reportReason.value) return;
+
+    try {
+      const response = await api.interactions.report(
+        reportItemType.value,
+        reportItemId.value,
+        reportReason.value,
+        reportDescription.value
+      );
+
+      closeReportModal();
+      showNotification('举报已提交，感谢您的反馈');
+    } catch (error) {
+      console.error('Report error:', error);
+      showNotification('举报提交失败，请稍后重试', 'error');
+    }
+  };
+
+  // 分享功能
+  const shareModal = document.getElementById('shareModal');
+  const shareItemId = document.getElementById('shareItemId');
+  const shareLink = document.getElementById('shareLink');
+  const copyShareLink = document.getElementById('copyShareLink');
+  const closeShare = document.getElementById('closeShare');
+  const shareWeibo = document.getElementById('shareWeibo');
+  const shareWechat = document.getElementById('shareWechat');
+  const shareTwitter = document.getElementById('shareTwitter');
+
+  const openShareModal = (e) => {
+    const target = e.currentTarget;
+    const id = target.dataset.id;
+    const title = target.dataset.title;
+
+    shareItemId.value = id;
+    const url = `${window.location.origin}/q/${id}`;
+    shareLink.value = url;
+
+    // 设置社交媒体分享链接
+    shareWeibo.href = `http://service.weibo.com/share/share.php?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}`;
+    shareTwitter.href = `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`;
+
+    shareModal.classList.remove('hidden');
+    shareModal.classList.add('flex');
+  };
+
+  const closeShareModal = () => {
+    shareModal.classList.remove('flex');
+    shareModal.classList.add('hidden');
+  };
+
+  const copyToClipboard = () => {
+    shareLink.select();
+    document.execCommand('copy');
+    showNotification('链接已复制到剪贴板');
+  };
+
+  // 通知功能
+  const notification = document.getElementById('notification');
+
+  const showNotification = (message, type = 'success') => {
+    notification.textContent = message;
+    notification.className = `fixed bottom-4 right-4 px-4 py-2 rounded shadow-lg ${
+      type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+    }`;
+    notification.classList.remove('hidden');
+
+    setTimeout(() => {
+      notification.classList.add('hidden');
+    }, 3000);
+  };
+
+  // 添加事件监听器
+  document.addEventListener('DOMContentLoaded', () => {
+    // 投票按钮
+    document.querySelectorAll('.vote-btn').forEach(btn => {
+      btn.addEventListener('click', handleVote);
+    });
+
+    // 收藏按钮
+    document.querySelectorAll('.bookmark-btn').forEach(btn => {
+      btn.addEventListener('click', handleBookmark);
+    });
+
+    // 举报按钮
+    document.querySelectorAll('.report-btn').forEach(btn => {
+      btn.addEventListener('click', openReportModal);
+    });
+
+    // 举报对话框
+    cancelReport.addEventListener('click', closeReportModal);
+    reportReason.addEventListener('change', () => {
+      submitReport.disabled = !reportReason.value;
+    });
+    submitReport.addEventListener('click', handleReportSubmit);
+
+    // 分享按钮
+    document.querySelectorAll('.share-btn').forEach(btn => {
+      btn.addEventListener('click', openShareModal);
+    });
+
+    // 分享对话框
+    closeShare.addEventListener('click', closeShareModal);
+    copyShareLink.addEventListener('click', copyToClipboard);
+
+    // 关闭模态框当点击背景
+    reportModal.addEventListener('click', (e) => {
+      if (e.target === reportModal) closeReportModal();
+    });
+
+    shareModal.addEventListener('click', (e) => {
+      if (e.target === shareModal) closeShareModal();
+    });
+  });
+</script>

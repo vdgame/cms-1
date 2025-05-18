@@ -1,0 +1,219 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import QuestionCard from '../../components/QuestionCard.astro';
+import Pagination from '../../components/Pagination.astro';
+import { tagService, questionService, interactionService } from '../../services';
+
+// 获取标签ID
+const { id } = Astro.params;
+
+// 如果没有ID，重定向到标签列表页
+if (!id) {
+  return Astro.redirect('/tags');
+}
+
+// 获取请求中的分页参数
+const page = parseInt(Astro.url.searchParams.get('page') || '1');
+const limit = 10;
+
+// 获取标签详情、问题和相关标签
+const tagData = await tagService.getTagById(id);
+
+// 如果标签不存在，返回404
+if (!tagData.tag) {
+  return Astro.redirect('/404');
+}
+
+const { tag, questions, relatedTags } = tagData;
+
+// 当前用户ID (在实际应用中应该从认证系统获取)
+const userId = 'meathill';
+
+// 获取用户是否关注了该标签
+const interactions = await interactionService.getUserInteractions(userId, 'tag', id);
+const isFollowed = interactions.followed || false;
+---
+
+<MainLayout title={`${tag.name} - 标签`}>
+  <div class="container mx-auto px-4 py-8">
+    <!-- 标签头部信息 -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-800">{tag.name}</h1>
+          <p class="text-gray-600 mt-2">该标签下共有 {tag.count} 个问题</p>
+        </div>
+        <div class="mt-4 md:mt-0">
+          <button
+            class={`follow-tag-btn px-4 py-2 rounded-md ${
+              isFollowed
+                ? 'bg-gray-200 text-gray-800 hover:bg-gray-300'
+                : 'bg-blue-500 text-white hover:bg-blue-600'
+            }`}
+            data-tag-id={id}
+          >
+            {isFollowed ? '已关注' : '关注标签'}
+          </button>
+        </div>
+      </div>
+
+      <div class="border-t pt-4">
+        <div class="flex flex-wrap justify-between">
+          <div class="w-full md:w-3/4">
+            <h3 class="text-lg font-medium mb-3">关于 {tag.name}</h3>
+            <p class="text-gray-700">
+              {tag.description || `${tag.name} 是一个用于标记与 ${tag.name} 相关问题的标签。`}
+            </p>
+          </div>
+
+          <div class="w-full md:w-1/4 mt-4 md:mt-0 md:pl-6">
+            <h3 class="text-lg font-medium mb-3">统计</h3>
+            <div class="flex flex-col space-y-2">
+              <div class="flex justify-between">
+                <span>问题数:</span>
+                <span class="font-medium">{tag.count}</span>
+              </div>
+              <div class="flex justify-between">
+                <span>关注者:</span>
+                <span class="font-medium">{tag.followerCount}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 相关标签 -->
+    {relatedTags.length > 0 && (
+      <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h3 class="text-lg font-medium mb-3">相关标签</h3>
+        <div class="flex flex-wrap gap-2">
+          {relatedTags.map((relatedTag) => (
+            <a
+              href={`/t/${relatedTag.id}`}
+              class="bg-blue-100 text-blue-700 px-3 py-1 rounded-md text-sm hover:bg-blue-200"
+            >
+              {relatedTag.name}
+              <span class="text-blue-500 ml-1">×{relatedTag.count}</span>
+            </a>
+          ))}
+        </div>
+      </div>
+    )}
+
+    <!-- 问题列表 -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold">问题列表</h2>
+        <div class="flex space-x-2">
+          <select class="border rounded px-3 py-1 text-sm text-gray-700">
+            <option value="newest">最新</option>
+            <option value="votes">得票最多</option>
+            <option value="active">最近活跃</option>
+          </select>
+        </div>
+      </div>
+
+      {questions.questions.length === 0 ? (
+        <div class="text-center py-8">
+          <p class="text-gray-500 mb-4">该标签下暂无问题</p>
+          <a href="/ask" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">提出一个问题</a>
+        </div>
+      ) : (
+        <div class="space-y-4">
+          {questions.questions.map((question) => (
+            <QuestionCard
+              id={question.id}
+              title={question.title}
+              content={question.content}
+              tags={question.tags}
+              votes={question.votes}
+              answers={question.answers}
+              views={question.views}
+              author={question.author}
+              createdAt={question.createdAt}
+              status={question.status}
+              isSolved={Boolean(question.isSolved)}
+            />
+          ))}
+
+          <!-- 分页 -->
+          {questions.pagination.totalPages > 1 && (
+            <Pagination
+              currentPage={questions.pagination.currentPage}
+              totalPages={questions.pagination.totalPages}
+              baseUrl={`/t/${id}`}
+            />
+          )}
+        </div>
+      )}
+    </div>
+  </div>
+
+  <!-- 通知信息 -->
+  <div id="notification" class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg hidden">
+    操作成功
+  </div>
+</MainLayout>
+
+<script>
+  // 使用服务器API替代localStorage
+  import { api } from '../../utils/api';
+
+  // 关注/取消关注标签
+  const handleFollowTag = async (e) => {
+    const btn = e.currentTarget;
+    const tagId = btn.dataset.tagId;
+
+    try {
+      const isFollowed = btn.textContent.trim() === '已关注';
+
+      if (isFollowed) {
+        // 取消关注
+        await api.tags.unfollow(tagId);
+        btn.textContent = '关注标签';
+        btn.classList.remove('bg-gray-200', 'text-gray-800', 'hover:bg-gray-300');
+        btn.classList.add('bg-blue-500', 'text-white', 'hover:bg-blue-600');
+        showNotification('已取消关注');
+      } else {
+        // 关注
+        await api.tags.follow(tagId);
+        btn.textContent = '已关注';
+        btn.classList.remove('bg-blue-500', 'text-white', 'hover:bg-blue-600');
+        btn.classList.add('bg-gray-200', 'text-gray-800', 'hover:bg-gray-300');
+        showNotification('已关注标签');
+      }
+
+      // 刷新页面以更新关注者数量
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } catch (error) {
+      console.error('Error following/unfollowing tag:', error);
+      showNotification('操作失败，请稍后重试', 'error');
+    }
+  };
+
+  // 通知功能
+  const notification = document.getElementById('notification');
+
+  const showNotification = (message, type = 'success') => {
+    notification.textContent = message;
+    notification.className = `fixed bottom-4 right-4 px-4 py-2 rounded shadow-lg ${
+      type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+    }`;
+    notification.classList.remove('hidden');
+
+    setTimeout(() => {
+      notification.classList.add('hidden');
+    }, 3000);
+  };
+
+  // 添加事件监听器
+  document.addEventListener('DOMContentLoaded', () => {
+    // 关注标签按钮
+    document.querySelectorAll('.follow-tag-btn').forEach(btn => {
+      btn.addEventListener('click', handleFollowTag);
+    });
+  });
+</script>

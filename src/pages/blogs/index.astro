@@ -1,0 +1,132 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import Sidebar from '../../components/Sidebar.astro';
+import BlogCard from '../../components/BlogCard.astro';
+import Pagination from '../../components/Pagination.astro';
+
+// 模拟博客数据
+const blogs = [
+  {
+    id: '1190000046539284',
+    title: 'go-zero框架的使用与实践',
+    summary: 'go-zero是一个集成了各种工程实践的web和rpc框架。通过弹性设计保障了大并发服务端的稳定性，容错性以及高可用性。',
+    cover: 'https://ext.same-assets.com/856991687/3851393466.jpeg',
+    author: {
+      id: 'wangzhongyang_go',
+      name: 'wangzhongyang',
+    },
+    createdAt: '5月 13日',
+    commentCount: 1
+  },
+  {
+    id: '1190000046541530',
+    title: '十年码农总结的编程经验，每一条都触及灵魂',
+    summary: '总结了十年编程生涯中的心得体会和教训，希望能给新手程序员一些指导和参考。',
+    author: {
+      id: 'codesheep_pro',
+      name: 'CodeSheep',
+      avatar: 'https://ext.same-assets.com/856991687/1530560597.png'
+    },
+    createdAt: '5月 14日',
+    commentCount: 0
+  },
+  {
+    id: '1190000046534398',
+    title: '深入理解Go语言中的错误处理机制',
+    summary: '本文详细探讨了Go语言中的错误处理设计理念，对比了其他编程语言的异常处理方式，并给出了Go错误处理的最佳实践。',
+    author: {
+      id: 'spacewander',
+      name: 'spacewander',
+      avatar: 'https://ext.same-assets.com/856991687/3310603818.jpeg'
+    },
+    createdAt: '5月 11日',
+    commentCount: 1
+  },
+  {
+    id: '1190000046538638',
+    title: '第一季技术领航者大会 AIGC 专场圆满落幕',
+    cover: 'https://ext.same-assets.com/856991687/1190106364.png',
+    author: {
+      id: 'writers',
+      name: 'SegmentFault官方',
+    },
+    createdAt: '5月 13日',
+    commentCount: 0
+  },
+  {
+    id: '1190000046534386',
+    title: 'Java Spring Boot 项目实践：构建高性能的RESTful API',
+    summary: '本文通过一个实际项目的开发流程，讲解了如何使用Spring Boot构建符合RESTful规范的高性能API接口。',
+    author: {
+      id: 'tangqingfeng',
+      name: 'TangQF',
+    },
+    createdAt: '5月 11日',
+    commentCount: 0
+  },
+  {
+    id: '1190000046537390',
+    title: 'FastVLM AI助手：打造新一代高效的Copilot开发体验',
+    cover: 'https://ext.same-assets.com/856991687/180497138.png',
+    author: {
+      id: 'rtedevcomm',
+      name: 'RTC开发者社区',
+      avatar: 'https://ext.same-assets.com/856991687/1845056981.png'
+    },
+    createdAt: '5月 12日',
+    commentCount: 0
+  },
+  {
+    id: '1190000046535197',
+    title: 'DeerFlow：开源的工作流引擎',
+    summary: '介绍一款轻量级的开源工作流引擎DeerFlow，可以满足大部分业务场景的流程审批需求。',
+    author: {
+      id: 'ting_61d6d9790dee8',
+      name: 'Ting',
+    },
+    createdAt: '5月 12日',
+    commentCount: 0
+  },
+];
+---
+
+<MainLayout title="技术博客">
+  <Header slot="header" />
+
+  <div class="flex flex-col md:flex-row gap-6">
+    <!-- 主要内容区 -->
+    <div class="md:w-3/4">
+      <!-- 博客导航 -->
+      <div class="bg-white rounded-md border border-neutral-200 mb-6">
+        <div class="flex border-b border-neutral-200 text-sm">
+          <a href="/blogs" class="px-4 py-3 text-primary-500 border-b-2 border-primary-500 font-medium">热门</a>
+          <a href="/blogs/hottest/weekly" class="px-4 py-3 text-neutral-600 hover:text-primary-500">本周最热</a>
+          <a href="/blogs/hottest/monthly" class="px-4 py-3 text-neutral-600 hover:text-primary-500">本月最热</a>
+          <a href="/blogs/newest" class="px-4 py-3 text-neutral-600 hover:text-primary-500">最新</a>
+          <div class="ml-auto px-4 py-3">
+            <a href="/write" class="bg-primary-500 text-white px-3 py-1.5 rounded text-sm hover:bg-primary-600 transition">
+              写博客
+            </a>
+          </div>
+        </div>
+
+        <!-- 博客列表 -->
+        <div>
+          {blogs.map(blog => <BlogCard blog={blog} />)}
+        </div>
+      </div>
+
+      <!-- 分页 -->
+      <Pagination currentPage={1} totalPages={20} baseUrl="/blogs?"/>
+    </div>
+
+    <!-- 侧边栏 -->
+    <div class="md:w-1/4">
+      <Sidebar />
+    </div>
+  </div>
+
+  <Footer slot="footer" />
+</MainLayout>

@@ -1,0 +1,158 @@
+---
+interface Props {
+  currentPage: number;
+  totalPages: number;
+  baseUrl: string;
+}
+
+const { currentPage, totalPages, baseUrl } = Astro.props;
+
+// 计算要显示的页码
+const getPageNumbers = (isMobile = false) => {
+  const pageNumbers = [];
+  const maxPagesToShow = isMobile ? 3 : 5;
+
+  if (totalPages <= maxPagesToShow) {
+    // 如果总页数小于等于最大显示页数，则显示所有页码
+    for (let i = 1; i <= totalPages; i++) {
+      pageNumbers.push(i);
+    }
+  } else {
+    // 确定起始页和结束页
+    let startPage = Math.max(currentPage - Math.floor(maxPagesToShow / 2), 1);
+    let endPage = startPage + maxPagesToShow - 1;
+
+    if (endPage > totalPages) {
+      endPage = totalPages;
+      startPage = Math.max(endPage - maxPagesToShow + 1, 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pageNumbers.push(i);
+    }
+  }
+
+  return pageNumbers;
+};
+
+const pageNumbersDesktop = getPageNumbers(false);
+const pageNumbersMobile = getPageNumbers(true);
+
+// 构建URL
+const getPageUrl = (page: number) => {
+  if (page === 1) {
+    return baseUrl;
+  }
+  return `${baseUrl}page=${page}`;
+};
+
+// 判断是否显示省略号
+const showFirstEllipsis = (pageNumbers: number[]) => pageNumbers.length > 0 && pageNumbers[0] > 1;
+const showLastEllipsis = (pageNumbers: number[]) => pageNumbers.length > 0 && pageNumbers[pageNumbers.length - 1] < totalPages;
+---
+
+<div class="flex justify-center my-4 md:my-6 pagination-container">
+  <!-- 桌面版分页 -->
+  <div class="hidden sm:flex items-center space-x-1">
+    <!-- 首页 -->
+    {currentPage > 3 && (
+      <a
+        href={getPageUrl(1)}
+        class="px-3 py-2 text-sm rounded-md border border-neutral-300 text-neutral-600 hover:bg-neutral-100"
+        aria-label="首页"
+      >
+        1
+      </a>
+    )}
+
+    <!-- 前省略号 -->
+    {showFirstEllipsis(pageNumbersDesktop) && currentPage > 3 && (
+      <span class="px-2 py-2 text-sm text-neutral-500">...</span>
+    )}
+
+    <!-- 页码 -->
+    {pageNumbersDesktop.map(page => (
+      <a
+        href={getPageUrl(page)}
+        class={`px-3 py-2 text-sm rounded-md ${currentPage === page
+          ? 'bg-primary-500 text-white'
+          : 'border border-neutral-300 text-neutral-600 hover:bg-neutral-100'}`}
+        aria-current={currentPage === page ? "page" : undefined}
+      >
+        {page}
+      </a>
+    ))}
+
+    <!-- 后省略号 -->
+    {showLastEllipsis(pageNumbersDesktop) && currentPage < totalPages - 2 && (
+      <span class="px-2 py-2 text-sm text-neutral-500">...</span>
+    )}
+
+    <!-- 尾页 -->
+    {currentPage < totalPages - 2 && (
+      <a
+        href={getPageUrl(totalPages)}
+        class="px-3 py-2 text-sm rounded-md border border-neutral-300 text-neutral-600 hover:bg-neutral-100"
+        aria-label="尾页"
+      >
+        {totalPages}
+      </a>
+    )}
+  </div>
+
+  <!-- 移动版分页 - 更简洁的设计 -->
+  <div class="flex sm:hidden items-center space-x-1">
+    <!-- 上一页 -->
+    {currentPage > 1 && (
+      <a
+        href={getPageUrl(currentPage - 1)}
+        class="px-2 py-1.5 text-xs rounded-md border border-neutral-300 text-neutral-600 hover:bg-neutral-100"
+        aria-label="上一页"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+      </a>
+    )}
+
+    <!-- 页码 - 移动端显示更少页码 -->
+    {pageNumbersMobile.map(page => (
+      <a
+        href={getPageUrl(page)}
+        class={`px-2.5 py-1.5 text-xs rounded-md ${currentPage === page
+          ? 'bg-primary-500 text-white'
+          : 'border border-neutral-300 text-neutral-600 hover:bg-neutral-100'}`}
+        aria-current={currentPage === page ? "page" : undefined}
+      >
+        {page}
+      </a>
+    ))}
+
+    <!-- 下一页 -->
+    {currentPage < totalPages && (
+      <a
+        href={getPageUrl(currentPage + 1)}
+        class="px-2 py-1.5 text-xs rounded-md border border-neutral-300 text-neutral-600 hover:bg-neutral-100"
+        aria-label="下一页"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </a>
+    )}
+
+    <!-- 总页数指示器 -->
+    <span class="ml-2 text-xs text-neutral-500">
+      {currentPage}/{totalPages}
+    </span>
+  </div>
+</div>
+
+<style>
+  /* 移动端底部导航栏的间距 */
+  @media (max-width: 640px) {
+    .pagination-container {
+      margin-bottom: 4.5rem;
+    }
+  }
+</style>
