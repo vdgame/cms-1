@@ -93,6 +93,19 @@ export const userInteractions = sqliteTable('user_interactions', {
   ),
 }));
 
+// 评论表
+export const comments = sqliteTable('comments', {
+  id: text('id').primaryKey(), // 使用自定义ID格式
+  content: text('content').notNull(),
+  authorId: text('author_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  targetType: text('target_type').notNull(), // 'question' 或 'answer'
+  targetId: text('target_id').notNull(),
+  parentId: text('parent_id').references(() => comments.id, { onDelete: 'cascade' }),
+  votes: integer('votes').notNull().default(0),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at'),
+});
+
 // 模式导出
 export type User = typeof users.$inferSelect;
 export type Tag = typeof tags.$inferSelect;
@@ -102,3 +115,4 @@ export type QuestionTag = typeof questionTags.$inferSelect;
 export type Answer = typeof answers.$inferSelect;
 export type UserActivity = typeof userActivities.$inferSelect;
 export type UserInteraction = typeof userInteractions.$inferSelect;
+export type Comment = typeof comments.$inferSelect;

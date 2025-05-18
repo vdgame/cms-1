@@ -1,0 +1,604 @@
+---
+// 评论组件
+interface CommentAuthor {
+  id: string;
+  name: string;
+  avatar: string;
+}
+
+interface CommentReply {
+  id: string;
+  content: string;
+  author: CommentAuthor;
+  targetType: string;
+  targetId: string;
+  parentId: string;
+  votes: number;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+interface CommentProps {
+  id: string;
+  content: string;
+  author: CommentAuthor;
+  targetType: string;
+  targetId: string;
+  parentId?: string;
+  votes: number;
+  createdAt: string;
+  updatedAt?: string;
+  replies?: CommentReply[];
+  currentUserId: string;
+}
+
+const {
+  id,
+  content,
+  author,
+  targetType,
+  targetId,
+  parentId,
+  votes,
+  createdAt,
+  updatedAt,
+  replies = [],
+  currentUserId
+} = Astro.props as CommentProps;
+
+// 判断当前用户是否是评论作者
+const isAuthor = currentUserId === author.id;
+
+// 格式化时间
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
+// 从创建时间获取相对时间
+const getRelativeTime = (dateString: string) => {
+  const now = new Date();
+  const date = new Date(dateString);
+  const diff = now.getTime() - date.getTime();
+
+  const seconds = Math.floor(diff / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+
+  if (seconds < 60) {
+    return '刚刚';
+  } else if (minutes < 60) {
+    return `${minutes}分钟前`;
+  } else if (hours < 24) {
+    return `${hours}小时前`;
+  } else if (days < 30) {
+    return `${days}天前`;
+  } else {
+    return formatDate(dateString);
+  }
+};
+---
+
+<div class="comment" id={id} data-parent-id={parentId}>
+  <div class={`p-4 mb-2 border-b ${parentId ? 'pl-12 border-l border-gray-200' : ''}`}>
+    <div class="flex">
+      <!-- 投票区域 -->
+      <div class="flex flex-col items-center mr-4">
+        <button
+          class="vote-btn upvote text-gray-400 hover:text-blue-500"
+          data-id={id}
+          data-type="comment"
+          data-value="1"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+            <path d="M12 4L4 15h16L12 4z" />
+          </svg>
+        </button>
+        <span class="text-sm font-medium my-1 vote-count">{votes}</span>
+        <button
+          class="vote-btn downvote text-gray-400 hover:text-red-500"
+          data-id={id}
+          data-type="comment"
+          data-value="-1"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+            <path d="M12 20L4 9h16L12 20z" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- 评论内容 -->
+      <div class="flex-1">
+        <div class="flex items-center mb-2">
+          <img src={author.avatar} alt={author.name} class="w-6 h-6 rounded-full mr-2" />
+          <a href={`/u/${author.id}`} class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+            {author.name}
+          </a>
+          <span class="mx-2 text-gray-500 text-xs">•</span>
+          <span class="text-gray-500 text-xs" title={formatDate(createdAt)}>
+            {getRelativeTime(createdAt)}
+          </span>
+          {updatedAt && (
+            <span class="text-gray-500 text-xs ml-2">(已编辑)</span>
+          )}
+        </div>
+
+        <div class="prose prose-sm max-w-none mb-3 comment-content" id={`comment-content-${id}`}>
+          {content.split('\n').map(paragraph => (
+            <p>{paragraph}</p>
+          ))}
+        </div>
+
+        <!-- 评论操作区 -->
+        <div class="flex items-center text-xs text-gray-500">
+          <button class="reply-btn hover:text-blue-500 mr-4" data-id={id} data-target-type={targetType} data-target-id={targetId}>
+            回复
+          </button>
+          {isAuthor && (
+            <>
+              <button class="edit-comment-btn hover:text-blue-500 mr-4" data-id={id}>
+                编辑
+              </button>
+              <button class="delete-comment-btn hover:text-red-500 mr-4" data-id={id}>
+                删除
+              </button>
+            </>
+          )}
+          <button
+            class="report-btn hover:text-red-500"
+            data-id={id}
+            data-type="comment"
+            title="举报"
+          >
+            举报
+          </button>
+        </div>
+
+        <!-- 编辑表单 (初始隐藏) -->
+        <div id={`edit-form-${id}`} class="mt-2 hidden">
+          <textarea
+            id={`edit-textarea-${id}`}
+            class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            rows="3"
+          >{content}</textarea>
+          <div class="flex justify-end mt-2">
+            <button
+              class="cancel-edit-btn px-3 py-1 bg-gray-200 text-gray-800 rounded mr-2"
+              data-id={id}
+            >
+              取消
+            </button>
+            <button
+              class="save-edit-btn px-3 py-1 bg-blue-500 text-white rounded"
+              data-id={id}
+            >
+              保存
+            </button>
+          </div>
+        </div>
+
+        <!-- 回复表单 (初始隐藏) -->
+        <div id={`reply-form-${id}`} class="mt-2 hidden">
+          <textarea
+            id={`reply-textarea-${id}`}
+            class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            rows="3"
+            placeholder="写下你的回复..."
+          ></textarea>
+          <div class="flex justify-end mt-2">
+            <button
+              class="cancel-reply-btn px-3 py-1 bg-gray-200 text-gray-800 rounded mr-2"
+              data-id={id}
+            >
+              取消
+            </button>
+            <button
+              class="submit-reply-btn px-3 py-1 bg-blue-500 text-white rounded"
+              data-id={id}
+              data-target-type={targetType}
+              data-target-id={targetId}
+            >
+              提交回复
+            </button>
+          </div>
+        </div>
+
+        <!-- 嵌套回复 -->
+        {replies.length > 0 && (
+          <div class="nested-replies mt-2">
+            {replies.map(reply => (
+              <div class="nested-reply pl-4 border-l border-gray-200 mb-2">
+                <div class="flex items-center mb-1">
+                  <img src={reply.author.avatar} alt={reply.author.name} class="w-5 h-5 rounded-full mr-1" />
+                  <a href={`/u/${reply.author.id}`} class="text-blue-600 hover:text-blue-800 text-xs font-medium">
+                    {reply.author.name}
+                  </a>
+                  <span class="mx-1 text-gray-500 text-xs">•</span>
+                  <span class="text-gray-500 text-xs" title={formatDate(reply.createdAt)}>
+                    {getRelativeTime(reply.createdAt)}
+                  </span>
+                  {reply.updatedAt && (
+                    <span class="text-gray-500 text-xs ml-1">(已编辑)</span>
+                  )}
+                </div>
+                <div class="prose prose-sm max-w-none mb-2" id={`comment-content-${reply.id}`}>
+                  {reply.content.split('\n').map(paragraph => (
+                    <p class="text-sm">{paragraph}</p>
+                  ))}
+                </div>
+                <div class="flex items-center text-xs text-gray-500">
+                  <button class="reply-btn hover:text-blue-500 mr-3" data-id={id} data-target-type={targetType} data-target-id={targetId}>
+                    回复
+                  </button>
+                  {currentUserId === reply.author.id && (
+                    <>
+                      <button class="edit-comment-btn hover:text-blue-500 mr-3" data-id={reply.id}>
+                        编辑
+                      </button>
+                      <button class="delete-comment-btn hover:text-red-500 mr-3" data-id={reply.id}>
+                        删除
+                      </button>
+                    </>
+                  )}
+                  <button
+                    class="report-btn hover:text-red-500"
+                    data-id={reply.id}
+                    data-type="comment"
+                    title="举报"
+                  >
+                    举报
+                  </button>
+                </div>
+
+                <!-- 编辑嵌套回复表单 (初始隐藏) -->
+                <div id={`edit-form-${reply.id}`} class="mt-2 hidden">
+                  <textarea
+                    id={`edit-textarea-${reply.id}`}
+                    class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    rows="2"
+                  >{reply.content}</textarea>
+                  <div class="flex justify-end mt-2">
+                    <button
+                      class="cancel-edit-btn px-2 py-1 bg-gray-200 text-gray-800 rounded mr-2 text-xs"
+                      data-id={reply.id}
+                    >
+                      取消
+                    </button>
+                    <button
+                      class="save-edit-btn px-2 py-1 bg-blue-500 text-white rounded text-xs"
+                      data-id={reply.id}
+                    >
+                      保存
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // 在脚本中添加交互逻辑
+  const handleCommentVote = async (e) => {
+    const target = e.currentTarget;
+    const id = target.dataset.id;
+    const type = target.dataset.type;
+    const value = parseInt(target.dataset.value);
+
+    try {
+      const response = await fetch('/api/comments/vote', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: 'meathill', // 在实际应用中应该从认证系统获取
+          commentId: id,
+          value,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      // 更新UI
+      const voteCount = target.parentElement.querySelector('.vote-count');
+
+      if (result.status === 'removed') {
+        target.classList.remove('text-blue-500', 'text-red-500');
+        target.classList.add('text-gray-400');
+        voteCount.textContent = parseInt(voteCount.textContent) - value;
+      } else if (result.status === 'updated') {
+        // 移除所有颜色
+        target.parentElement.querySelector('.upvote').classList.remove('text-blue-500');
+        target.parentElement.querySelector('.downvote').classList.remove('text-red-500');
+        target.parentElement.querySelector('.upvote').classList.add('text-gray-400');
+        target.parentElement.querySelector('.downvote').classList.add('text-gray-400');
+
+        // 添加新颜色
+        if (value === 1) {
+          target.classList.remove('text-gray-400');
+          target.classList.add('text-blue-500');
+        } else {
+          target.classList.remove('text-gray-400');
+          target.classList.add('text-red-500');
+        }
+
+        // 更新计数
+        voteCount.textContent = parseInt(voteCount.textContent) + (value * 2);
+      } else {
+        if (value === 1) {
+          target.classList.remove('text-gray-400');
+          target.classList.add('text-blue-500');
+        } else {
+          target.classList.remove('text-gray-400');
+          target.classList.add('text-red-500');
+        }
+        voteCount.textContent = parseInt(voteCount.textContent) + value;
+      }
+    } catch (error) {
+      console.error('Comment vote error:', error);
+      showNotification('投票失败，请稍后重试', 'error');
+    }
+  };
+
+  // 显示回复表单
+  const showReplyForm = (e) => {
+    const commentId = e.currentTarget.dataset.id;
+    const replyForm = document.getElementById(`reply-form-${commentId}`);
+
+    // 隐藏所有其他回复表单
+    document.querySelectorAll('[id^="reply-form-"]').forEach(form => {
+      if (form.id !== `reply-form-${commentId}`) {
+        form.classList.add('hidden');
+      }
+    });
+
+    // 隐藏所有编辑表单
+    document.querySelectorAll('[id^="edit-form-"]').forEach(form => {
+      form.classList.add('hidden');
+    });
+
+    // 显示当前回复表单
+    replyForm.classList.remove('hidden');
+
+    // 聚焦文本区域
+    document.getElementById(`reply-textarea-${commentId}`).focus();
+  };
+
+  // 取消回复
+  const cancelReply = (e) => {
+    const commentId = e.currentTarget.dataset.id;
+    const replyForm = document.getElementById(`reply-form-${commentId}`);
+    replyForm.classList.add('hidden');
+
+    // 清空文本区域
+    document.getElementById(`reply-textarea-${commentId}`).value = '';
+  };
+
+  // 提交回复
+  const submitReply = async (e) => {
+    const target = e.currentTarget;
+    const commentId = target.dataset.id;
+    const targetType = target.dataset.targetType;
+    const targetId = target.dataset.targetId;
+    const textarea = document.getElementById(`reply-textarea-${commentId}`);
+    const content = textarea.value.trim();
+
+    if (!content) {
+      showNotification('回复内容不能为空', 'error');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/comments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          authorId: 'meathill', // 在实际应用中应该从认证系统获取
+          targetType,
+          targetId,
+          content,
+          parentId: commentId,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+
+      showNotification('回复已提交');
+
+      // 隐藏回复表单
+      document.getElementById(`reply-form-${commentId}`).classList.add('hidden');
+
+      // 清空文本区域
+      textarea.value = '';
+
+      // 重新加载评论
+      window.location.reload();
+    } catch (error) {
+      console.error('Submit reply error:', error);
+      showNotification('提交回复失败，请稍后重试', 'error');
+    }
+  };
+
+  // 显示编辑表单
+  const showEditForm = (e) => {
+    const commentId = e.currentTarget.dataset.id;
+    const editForm = document.getElementById(`edit-form-${commentId}`);
+    const contentDiv = document.getElementById(`comment-content-${commentId}`);
+
+    // 隐藏所有回复表单
+    document.querySelectorAll('[id^="reply-form-"]').forEach(form => {
+      form.classList.add('hidden');
+    });
+
+    // 隐藏所有其他编辑表单
+    document.querySelectorAll('[id^="edit-form-"]').forEach(form => {
+      if (form.id !== `edit-form-${commentId}`) {
+        form.classList.add('hidden');
+      }
+    });
+
+    // 显示当前编辑表单
+    editForm.classList.remove('hidden');
+
+    // 隐藏内容
+    contentDiv.classList.add('hidden');
+
+    // 聚焦文本区域
+    document.getElementById(`edit-textarea-${commentId}`).focus();
+  };
+
+  // 取消编辑
+  const cancelEdit = (e) => {
+    const commentId = e.currentTarget.dataset.id;
+    const editForm = document.getElementById(`edit-form-${commentId}`);
+    const contentDiv = document.getElementById(`comment-content-${commentId}`);
+
+    // 隐藏编辑表单
+    editForm.classList.add('hidden');
+
+    // 显示内容
+    contentDiv.classList.remove('hidden');
+  };
+
+  // 保存编辑
+  const saveEdit = async (e) => {
+    const commentId = e.currentTarget.dataset.id;
+    const textarea = document.getElementById(`edit-textarea-${commentId}`);
+    const content = textarea.value.trim();
+
+    if (!content) {
+      showNotification('评论内容不能为空', 'error');
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/comments/${commentId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          content,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+
+      showNotification('评论已更新');
+
+      // 重新加载评论
+      window.location.reload();
+    } catch (error) {
+      console.error('Save edit error:', error);
+      showNotification('保存编辑失败，请稍后重试', 'error');
+    }
+  };
+
+  // 删除评论
+  const deleteComment = async (e) => {
+    if (!confirm('确定要删除这条评论吗？此操作不可撤销。')) {
+      return;
+    }
+
+    const commentId = e.currentTarget.dataset.id;
+
+    try {
+      const response = await fetch(`/api/comments/${commentId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+
+      showNotification('评论已删除');
+
+      // 重新加载评论
+      window.location.reload();
+    } catch (error) {
+      console.error('Delete comment error:', error);
+      showNotification('删除评论失败，请稍后重试', 'error');
+    }
+  };
+
+  // 显示通知
+  const showNotification = (message, type = 'success') => {
+    const notification = document.getElementById('notification');
+    if (!notification) return;
+
+    notification.textContent = message;
+    notification.className = `fixed bottom-4 right-4 px-4 py-2 rounded shadow-lg ${
+      type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+    }`;
+    notification.classList.remove('hidden');
+
+    setTimeout(() => {
+      notification.classList.add('hidden');
+    }, 3000);
+  };
+
+  // 添加事件监听器
+  document.addEventListener('DOMContentLoaded', () => {
+    // 评论投票按钮
+    document.querySelectorAll('.comment .vote-btn').forEach(btn => {
+      btn.addEventListener('click', handleCommentVote);
+    });
+
+    // 回复按钮
+    document.querySelectorAll('.reply-btn').forEach(btn => {
+      btn.addEventListener('click', showReplyForm);
+    });
+
+    // 取消回复按钮
+    document.querySelectorAll('.cancel-reply-btn').forEach(btn => {
+      btn.addEventListener('click', cancelReply);
+    });
+
+    // 提交回复按钮
+    document.querySelectorAll('.submit-reply-btn').forEach(btn => {
+      btn.addEventListener('click', submitReply);
+    });
+
+    // 编辑评论按钮
+    document.querySelectorAll('.edit-comment-btn').forEach(btn => {
+      btn.addEventListener('click', showEditForm);
+    });
+
+    // 取消编辑按钮
+    document.querySelectorAll('.cancel-edit-btn').forEach(btn => {
+      btn.addEventListener('click', cancelEdit);
+    });
+
+    // 保存编辑按钮
+    document.querySelectorAll('.save-edit-btn').forEach(btn => {
+      btn.addEventListener('click', saveEdit);
+    });
+
+    // 删除评论按钮
+    document.querySelectorAll('.delete-comment-btn').forEach(btn => {
+      btn.addEventListener('click', deleteComment);
+    });
+  });
+</script>

@@ -115,6 +115,72 @@ export const api = {
     getById(questionId: string) {
       return api.get(`/questions/${questionId}`);
     },
+
+    // 创建问题
+    create(title: string, content: string, tags: string[] = []) {
+      return api.post('/questions', {
+        authorId: getCurrentUserId(),
+        title,
+        content,
+        tags
+      });
+    },
+
+    // 编辑问题
+    edit(id: string, title: string, content: string, tags: string[] = []) {
+      return api.put('/questions/edit', {
+        id,
+        authorId: getCurrentUserId(),
+        title,
+        content,
+        tags
+      });
+    },
+
+    // 删除问题
+    delete(id: string) {
+      return api.delete(`/questions/delete?id=${id}&authorId=${getCurrentUserId()}`);
+    },
+  },
+
+  // 回答相关API
+  answers: {
+    // 获取问题的回答
+    getByQuestion(questionId: string) {
+      return api.get(`/questions/${questionId}/answers`);
+    },
+
+    // 创建回答
+    create(questionId: string, content: string) {
+      return api.post('/answers', {
+        authorId: getCurrentUserId(),
+        questionId,
+        content
+      });
+    },
+
+    // 编辑回答
+    edit(id: string, content: string) {
+      return api.put('/answers/edit', {
+        id,
+        authorId: getCurrentUserId(),
+        content
+      });
+    },
+
+    // 删除回答
+    delete(id: string) {
+      return api.delete(`/answers/delete?id=${id}&authorId=${getCurrentUserId()}`);
+    },
+
+    // 标记为最佳回答
+    markAsBest(answerId: string, questionId: string) {
+      return api.post('/answers/accept', {
+        answerId,
+        questionId,
+        userId: getCurrentUserId()
+      });
+    }
   },
 
   // 搜索API
@@ -161,6 +227,49 @@ export const api = {
     },
   },
 
+  // 评论相关API
+  comments: {
+    // 获取目标的评论
+    getByTarget(targetType: 'question' | 'answer', targetId: string) {
+      return api.get('/comments', { targetType, targetId });
+    },
+
+    // 获取评论详情
+    getById(commentId: string) {
+      return api.get(`/comments/${commentId}`);
+    },
+
+    // 创建评论
+    create(targetType: 'question' | 'answer', targetId: string, content: string, parentId?: string) {
+      return api.post('/comments', {
+        authorId: getCurrentUserId(),
+        targetType,
+        targetId,
+        content,
+        parentId,
+      });
+    },
+
+    // 更新评论
+    update(commentId: string, content: string) {
+      return api.put(`/comments/${commentId}`, { content });
+    },
+
+    // 删除评论
+    delete(commentId: string) {
+      return api.delete(`/comments/${commentId}`);
+    },
+
+    // 投票评论
+    vote(commentId: string, value: 1 | -1) {
+      return api.post('/comments/vote', {
+        userId: getCurrentUserId(),
+        commentId,
+        value,
+      });
+    },
+  },
+
   // 交互相关API
   interactions: {
     // 获取用户与目标的交互状态
@@ -173,7 +282,7 @@ export const api = {
     },
 
     // 投票（点赞/踩）
-    vote(targetType: 'question' | 'answer', targetId: string, value: 1 | -1) {
+    vote(targetType: 'question' | 'answer' | 'comment', targetId: string, value: 1 | -1) {
       return api.post('/interactions/vote', {
         userId: getCurrentUserId(),
         targetType,
@@ -191,7 +300,7 @@ export const api = {
     },
 
     // 举报内容
-    report(targetType: 'question' | 'answer', targetId: string, reason: string, description?: string) {
+    report(targetType: 'question' | 'answer' | 'comment', targetId: string, reason: string, description?: string) {
       return api.post('/interactions/report', {
         userId: getCurrentUserId(),
         targetType,

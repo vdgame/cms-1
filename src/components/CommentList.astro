@@ -1,0 +1,181 @@
+---
+import Comment from './Comment.astro';
+import { commentService } from '../services';
+
+interface CommentListProps {
+  targetType: 'question' | 'answer';
+  targetId: string;
+  currentUserId: string;
+}
+
+const { targetType, targetId, currentUserId } = Astro.props as CommentListProps;
+
+// 获取目标的评论
+const comments = await commentService.getCommentsByTarget(targetType, targetId);
+---
+
+<div class="comments-container mb-4">
+  <div class="comments-header flex justify-between items-center mb-2">
+    <h3 class="text-lg font-semibold">{comments.length} 条评论</h3>
+    <button
+      class="add-comment-btn text-blue-500 hover:text-blue-700 text-sm"
+      data-target-type={targetType}
+      data-target-id={targetId}
+    >
+      添加评论
+    </button>
+  </div>
+
+  <!-- 新评论表单 (初始隐藏) -->
+  <div id={`new-comment-form-${targetType}-${targetId}`} class="mb-4 hidden">
+    <textarea
+      id={`new-comment-textarea-${targetType}-${targetId}`}
+      class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      rows="3"
+      placeholder="写下你的评论..."
+    ></textarea>
+    <div class="flex justify-end mt-2">
+      <button
+        class="cancel-new-comment-btn px-3 py-1 bg-gray-200 text-gray-800 rounded mr-2"
+        data-target-type={targetType}
+        data-target-id={targetId}
+      >
+        取消
+      </button>
+      <button
+        class="submit-new-comment-btn px-3 py-1 bg-blue-500 text-white rounded"
+        data-target-type={targetType}
+        data-target-id={targetId}
+      >
+        提交评论
+      </button>
+    </div>
+  </div>
+
+  <!-- 评论列表 -->
+  <div class="comments-list">
+    {comments.length ? (
+      comments.map(comment => (
+        <Comment
+          id={comment.id}
+          content={comment.content}
+          author={comment.author}
+          targetType={comment.targetType}
+          targetId={comment.targetId}
+          parentId={comment.parentId}
+          votes={comment.votes}
+          createdAt={comment.createdAt}
+          updatedAt={comment.updatedAt}
+          replies={comment.replies}
+          currentUserId={currentUserId}
+        />
+      ))
+    ) : (
+      <div class="text-center py-4 text-gray-500">
+        暂无评论，快来发表第一条评论吧！
+      </div>
+    )}
+  </div>
+</div>
+
+<script>
+  // 显示新评论表单
+  const showNewCommentForm = (e) => {
+    const targetType = e.currentTarget.dataset.targetType;
+    const targetId = e.currentTarget.dataset.targetId;
+    const formId = `new-comment-form-${targetType}-${targetId}`;
+
+    document.getElementById(formId).classList.remove('hidden');
+    document.getElementById(`new-comment-textarea-${targetType}-${targetId}`).focus();
+
+    // 隐藏"添加评论"按钮
+    e.currentTarget.classList.add('hidden');
+  };
+
+  // 取消新评论
+  const cancelNewComment = (e) => {
+    const targetType = e.currentTarget.dataset.targetType;
+    const targetId = e.currentTarget.dataset.targetId;
+    const formId = `new-comment-form-${targetType}-${targetId}`;
+
+    document.getElementById(formId).classList.add('hidden');
+    document.getElementById(`new-comment-textarea-${targetType}-${targetId}`).value = '';
+
+    // 显示"添加评论"按钮
+    document.querySelector(`.add-comment-btn[data-target-type="${targetType}"][data-target-id="${targetId}"]`).classList.remove('hidden');
+  };
+
+  // 提交新评论
+  const submitNewComment = async (e) => {
+    const targetType = e.currentTarget.dataset.targetType;
+    const targetId = e.currentTarget.dataset.targetId;
+    const textareaId = `new-comment-textarea-${targetType}-${targetId}`;
+    const content = document.getElementById(textareaId).value.trim();
+
+    if (!content) {
+      showNotification('评论内容不能为空', 'error');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/comments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          authorId: 'meathill', // 在实际应用中应该从认证系统获取
+          targetType,
+          targetId,
+          content
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+
+      showNotification('评论已发布');
+
+      // 重新加载页面以显示新评论
+      window.location.reload();
+    } catch (error) {
+      console.error('Submit comment error:', error);
+      showNotification('发布评论失败，请稍后重试', 'error');
+    }
+  };
+
+  // 显示通知
+  const showNotification = (message, type = 'success') => {
+    const notification = document.getElementById('notification');
+    if (!notification) return;
+
+    notification.textContent = message;
+    notification.className = `fixed bottom-4 right-4 px-4 py-2 rounded shadow-lg ${
+      type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+    }`;
+    notification.classList.remove('hidden');
+
+    setTimeout(() => {
+      notification.classList.add('hidden');
+    }, 3000);
+  };
+
+  // 添加事件监听器
+  document.addEventListener('DOMContentLoaded', () => {
+    // "添加评论"按钮
+    document.querySelectorAll('.add-comment-btn').forEach(btn => {
+      btn.addEventListener('click', showNewCommentForm);
+    });
+
+    // "取消"按钮
+    document.querySelectorAll('.cancel-new-comment-btn').forEach(btn => {
+      btn.addEventListener('click', cancelNewComment);
+    });
+
+    // "提交评论"按钮
+    document.querySelectorAll('.submit-new-comment-btn').forEach(btn => {
+      btn.addEventListener('click', submitNewComment);
+    });
+  });
+</script>
